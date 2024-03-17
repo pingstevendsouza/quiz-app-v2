@@ -163,7 +163,7 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
                   {/* <Pagination
                   activePage={activePage}
                   onPageChange={handlePaginationChange}
-                  totalPages={data.length}
+                  totalPages={data.length}npm
                 /> */}
                 </>:<></>}
                   
