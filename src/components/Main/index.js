@@ -22,6 +22,7 @@ import {
   QUESTIONS_TYPE,
   COUNTDOWN_TIME,
   CAD_EXAM,
+  CSA_EXAM,
   SHUFFLE
 } from '../../constants';
 import { shuffle } from '../../utils';
@@ -29,7 +30,7 @@ import { shuffle } from '../../utils';
 import Offline from '../Offline';
 
 const Main = ({ startQuiz }) => {
-  const [category, setCategory] = useState(2);
+  const [category, setCategory] = useState(1);
   const [numOfQuestions, setNumOfQuestions] = useState(60);
   const [difficulty, setDifficulty] = useState('easy');
   const [questionsType, setQuestionsType] = useState('0');
@@ -62,10 +63,19 @@ const Main = ({ startQuiz }) => {
   }
 
   const fetchData = () => {
-    setProcessing(true);
+    
 
     if (error) setError(null);
-      const data=CAD_EXAM;
+    let data={};
+    if(category===1)
+      data=CSA_EXAM;
+    else if (category===2)
+      data=CAD_EXAM;
+    else{
+      alert("Not yet implemented, please wait or try again later");
+      return;
+    }
+    setProcessing(true);
     //const API = `https://opentdb.com/api.php?amount=${numOfQuestions}&category=${category}&difficulty=${difficulty}&type=${questionsType}`;
 
     // fetch(API)
