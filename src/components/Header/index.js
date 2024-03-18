@@ -31,7 +31,7 @@ const Header = () => {
   return (
     <Menu stackable inverted>
       <Menu.Item header>
-        <h1>ServiceNow Questionnaire</h1>
+        <h1>ServiceNow Quiz</h1>
       </Menu.Item>
       {promptEvent && !isAppInstalled && (
         <Menu.Item position="right">
