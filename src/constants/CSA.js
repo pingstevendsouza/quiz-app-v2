@@ -4,7 +4,7 @@ const CSA_EXAM = {
         {
             "type": "multiple",
             "category": "CSA",
-            "question": "Topic 1 A Service Catalog may include which of the following components?",
+            "question": "A Service Catalog may include which of the following components?",
             "correct_answers": [
                 "Record Producers, Order Guides, and Catalog Items"
             ],
