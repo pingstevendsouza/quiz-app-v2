@@ -41,7 +41,7 @@ const ShareButton = () => {
           <Modal.Header className="ui center aligned">Share on</Modal.Header>
           <Modal.Content className="ui center aligned container">
             <a
-              href="https://www.facebook.com/sharer.php?u=https%3A//safdarjamal.github.io/quiz-app/"
+              href={"https://www.facebook.com/sharer.php?u="+encodeURIComponent(window.location.href)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -51,7 +51,7 @@ const ShareButton = () => {
               </Button>
             </a>
             <a
-              href="https://twitter.com/intent/tweet?url=https%3A//safdarjamal.github.io/quiz-app/&text=Check%20out%20this%20quiz%20app%20—%20it%20rocks!&via=_safdarjamal"
+              href={"https://twitter.com/intent/tweet?url="+encodeURIComponent(window.location.href)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -61,7 +61,7 @@ const ShareButton = () => {
               </Button>
             </a>
             <a
-              href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fsafdarjamal.github.io%2Fquiz-app%2F"
+              href={"https://www.linkedin.com/shareArticle?mini=true&url="+encodeURIComponent(window.location.href)}
               target="_blank"
               rel="noopener noreferrer"
             >
