@@ -10,9 +10,11 @@ import {
   Message,
   Menu,
   Header,
-  Pagination
+  Pagination,
+  Checkbox
 } from 'semantic-ui-react';
 import he from 'he';
+
 
 import Countdown from '../Countdown';
 import { getLetter } from '../../utils';
@@ -21,29 +23,82 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [userSlectedAns, setUserSlectedAns] = useState([]);
+  const [checked, setChecked] = useState([]);
   const [activePage, setActivePage] = useState(1);
   const [questionsAndAnswers, setQuestionsAndAnswers] = useState([]);
   const [timeTaken, setTimeTaken] = useState(null);
+  const [questionsType, setQuestionsType] = useState(data[questionIndex].correct_answers.length>1?"multiple":"single");
+  
 
   useEffect(() => {
     if (questionIndex > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    setQuestionsType(data[questionIndex].correct_answers.length>1?"multiple":"single");
+    
   }, [questionIndex]);
 
-  const handleItemClick = (e, { name }) => {
-    let myArr=userSlectedAns;
-    if(e.ctrlKey){
+
+   
+  const checkBoxOnChange =(data, dataIndex, decodedOption)=>{
+    
+    let myAns=userSlectedAns;
+    
+    if(questionsType=="multiple"){
+    if(data.checked){
+        if(!myAns[questionIndex]) myAns[questionIndex]=[];
+        
+        myAns[questionIndex].push(decodedOption);
+     }else{
+      const index = myAns[questionIndex].indexOf(decodedOption);
+      if (index > -1) { // only splice array when item is found
+        myAns[questionIndex].splice(index, 1); // 2nd parameter means remove one item only
+      }
+
       
-      myArr[questionIndex].push(name);
-      
-    }else
-    myArr[questionIndex]=[name];
-     
-    setUserSlectedAns(myArr);
+    }
+    
+
+
+    }else{
+      myAns[questionIndex]=[];
+      myAns[questionIndex].push(decodedOption);
+    }
+
+
+    setUserSlectedAns(myAns);
+  }
+
+  const handleItemClick = (e, props) => {
+    
+    let myCheck=checked;
+    let dataIndex=props.children.props.dataIndex;
+    let decodedOption=props.children.props.decodedOption;
+    if(questionsType=="multiple"){
+    if(myCheck[questionIndex]) {
+      myCheck[questionIndex][dataIndex]=!myCheck[questionIndex][dataIndex];
+    }
+    else{
+      myCheck[questionIndex]={};
+      myCheck[questionIndex][dataIndex]=true;
+    }
+  }else{
+      myCheck[questionIndex]={};
+      myCheck[questionIndex][dataIndex]=true;
+  }
+
+    setChecked(myCheck);
+
+    let myData={};
+    myData["checked"]=myCheck[questionIndex][dataIndex];
+
+
+    checkBoxOnChange(myData, dataIndex, decodedOption);
     
   };
 
 
   const handleNext = () => {
+    debugger;
     let point = 0;
 
     if (JSON.stringify(userSlectedAns[questionIndex].sort()) === he.decode(JSON.stringify(data[questionIndex].correct_answers.sort()))) {
@@ -74,9 +129,10 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
   };
 
   const handlePrev = () => {
+    debugger;
     let point = 0;
 
-    if (userSlectedAns && userSlectedAns[questionIndex] && JSON.stringify(userSlectedAns[questionIndex].sort()) === he.decode(JSON.stringify(data[questionIndex].correct_answers.sort()))) {
+    if (userSlectedAns && userSlectedAns[questionIndex-1] && JSON.stringify(userSlectedAns[questionIndex-1].sort()) === he.decode(JSON.stringify(data[questionIndex-1].correct_answers.sort()))) {
       point = 1;
     }
     setCorrectAnswers(correctAnswers - point);
@@ -134,16 +190,43 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
                     {data[questionIndex].options.map((option, i) => {
                       const letter = getLetter(i);
                       const decodedOption = he.decode(option);
-
+                      
+                      
                       return (
                         <Menu.Item
                           key={decodedOption}
                           name={decodedOption}
-                          active={userSlectedAns && userSlectedAns[questionIndex] && userSlectedAns[questionIndex].indexOf(decodedOption)!==-1}
+                          active={checked[questionIndex] && checked[questionIndex][i]}
                           onClick={handleItemClick}
                         >
-                          <b style={{ marginRight: '8px' }}>{letter}</b>
-                          {decodedOption}
+                          <Checkbox 
+                          radio={data[questionIndex].correct_answers.length>1?false:true}
+                          name={data[questionIndex].correct_answers.length>1?"question"+questionIndex+i:"question"+questionIndex}
+                          label={<label><b style={{ marginRight: '8px', marginLeft: '8px' }}>{letter}</b>
+                          {decodedOption}</label>}
+                            onChange={(e, data) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              let myCheck=checked;
+                              if(questionsType=="multiple"){
+                              if(!myCheck[questionIndex]) myCheck[questionIndex]={};
+                              myCheck[questionIndex][i]=data.checked;
+                              }else{
+                                myCheck[questionIndex]={};
+                                myCheck[questionIndex][i]=data.checked;
+                              }
+                              setChecked(myCheck); 
+
+                              checkBoxOnChange(data,i,decodedOption);
+
+                            }}
+                            checked={(checked[questionIndex] && checked[questionIndex][i])?true:false}
+                            dataIndex={i}
+                            option={letter}
+                            decodedOption={decodedOption}
+                          />
+                          
+                          
                         </Menu.Item>
                       );
                     })}
