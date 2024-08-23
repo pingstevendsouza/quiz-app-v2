@@ -1,7 +1,7 @@
 {
   "short_name": "ServiceNow QuizApp",
   "name": "ServiceNow QuizApp",
-  "description": "ServiceNow QuizApp - Open source - Customized By Steven Dsouza.",
+  "description": "ServiceNow QuizApp",
   "icons": [
     {
       "src": "android-chrome-192x192.png",
