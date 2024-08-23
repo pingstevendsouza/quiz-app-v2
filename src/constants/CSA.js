@@ -178,12 +178,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What is the platform name for the User table?",
             "correct_answers": [
-                "sys_users"
+                "sys_user"
             ],
             "incorrect_answers": [
                 "u_users",
                 "x_users",
-                "sys_user"
+                "sys_users"
             ]
         },
         {
@@ -995,11 +995,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Access Control rules may provide access security for which of the following database objects?",
             "correct_answers": [
-                "For a specific CMDB Configuration item"
+                "For a specific row, column, or table"
             ],
             "incorrect_answers": [
                 "For a specific role, group, or user",
-                "For a specific row, column, or table",
+                "For a specific CMDB Configuration item",
                 "For specific groups"
             ]
         },
@@ -1021,11 +1021,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which of the following steps can be used to import new data into ServiceNow from a spreadsheet?",
             "correct_answers": [
-                "Select Import Set, Select Transform Map, Run Transform"
+                "Load Data, Create Transform Map, Run Transform"
             ],
             "incorrect_answers": [
                 "Select Data Source, Schedule Transform",
-                "Load Data, Create Transform Map, Run Transform",
+                "Select Import Set, Select Transform Map, Run Transform",
                 "Define Data Source, Select Transform Map, Run Transform"
             ]
         },
@@ -1138,12 +1138,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "An IT manager is responsible for the Network and Hardware assignment groups, each group contains 5 team members. These team members are working on many tasks, but the manager cannot see any tasks on the Service Desk > My Groups Work list. What could explain this?",
             "correct_answers": [
-                "The manager does not have the itil role."
+                "The manager is not a member of the Network and Hardware groups."
             ],
             "incorrect_answers": [
                 "The Service Desk > My Groups Work list shows active work tasks that are not yet assigned.",
                 "The manager is not a member of the Service Desk group.",
-                "The manager is not a member of the Network and Hardware groups.",
+                "The manager does not have the itil role.",
                 "The Assignment Group manager field is empty."
             ]
         },
@@ -1166,14 +1166,14 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "The ServiceNow platform includes which types of interfaces? (Choose three.)",
             "correct_answers": [
-                "Agent Control Center",
+                "Now Mobile Apps",
                 "Now Platformֲ® User Interfaces",
-                "Field Service Taskboard"
+                "Service Portals"
             ],
             "incorrect_answers": [
-                "Now Mobile Apps",
+                "Agent Control Center",
                 "Back Office Dashboard",
-                "Service Portals"
+                "Field Service Taskboard"
             ]
         },
         {
@@ -1201,11 +1201,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "You are showing your customer a new form that you have created for their new application. They would like to add a field to the form. Where could you do that? (Choose two.)",
             "correct_answers": [
-                "Select Fields and Columns module",
-                "Right click on form header, select Configure > Form Layout"
+                "Right click on form header, select Configure > Form Layout",
+                "Click on context menu, select Configure > Form Designer"
             ],
             "incorrect_answers": [
-                "Click on context menu, select Configure > Form Designer",
+                "Select Fields and Columns module",
                 "Select Field Class Manager module"
             ]
         },
@@ -1302,16 +1302,16 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What needs to be specified, when creating a Business Rule? (Choose four.)",
             "correct_answers": [
-                "UI action",
                 "Table",
-                "Script to run",
-                "Application scope"
-            ],
-            "incorrect_answers": [
                 "Fields to update",
                 "Who can run",
+                "Timing"
+            ],
+            "incorrect_answers": [
+                "UI action",
+                "Script to run",
                 "Update set",
-                "Timing",
+                "Application scope",
                 "Condition to evaluate"
             ]
         },
@@ -1334,12 +1334,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What is a quick way to create a report from a list view?",
             "correct_answers": [
-                "Click Funnel, define filter conditions, click Create Report"
+                "Apply filter, right click on column header, select Bar Chart"
             ],
             "incorrect_answers": [
                 "Click on filter breadcrumb, drag and drop on the Report > Create New module",
                 "Click Context Menu, select Create Report",
-                "Apply filter, right click on column header, select Bar Chart",
+                "Click Funnel, define filter conditions, click Create Report",
                 "Apply filter, right click on column header, select Create Report"
             ]
         },
@@ -1405,14 +1405,14 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When testing a catalog item, having a manager approval flows, which of these best practices would you follow? (Choose three.)",
             "correct_answers": [
+                "Make sure the latest flows are activated.",
+                "Impersonate the requester to ensure the form works."
                 "Make sure the requester's user record has a manager specified.",
-                "Create and select your Testing Update Set, before starting the test cases.",
-                "Use your Admin account, so you can approve the items quickly."
             ],
             "incorrect_answers": [
-                "Make sure the latest flows are activated.",
+                "Create and select your Testing Update Set, before starting the test cases.",
                 "Use the instance Incognito setting to quickly toggle between requester and approver.",
-                "Impersonate the requester to ensure the form works."
+                "Use your Admin account, so you can approve the items quickly."
             ]
         },
         {
@@ -1434,10 +1434,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When moving multiple update sets at one time, what might you do to facilitate the move?",
             "correct_answers": [
-                "Preview"
+                "Batch"
             ],
             "incorrect_answers": [
-                "Batch",
+                "Preview",
                 "Verify",
                 "Test"
             ]
@@ -1487,11 +1487,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "A new service catalog item is being developed, but should only be visible to managers inside the HR Department. What method would you use to fulfill this requirement?",
             "correct_answers": [
-                "Add the Department Manager group to the catalog item's ACL"
+                "Add the Department Manager group to the catalog item's user criteria"
             ],
             "incorrect_answers": [
                 "Specify the Dept_Mgr role on the catalog content block",
-                "Add the Department Manager group to the catalog item's user criteria",
+                "Add the Department Manager group to the catalog item's ACL",
                 "Only publish the item in the HR service catalog",
                 "Use a Dept_Mgr ACL on the HR service catalog"
             ]
@@ -1556,10 +1556,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What type of field allows you to look up values from one other table?",
             "correct_answers": [
-                "Lookup"
+                "Reference"
             ],
             "incorrect_answers": [
-                "Reference",
+                "Lookup",
                 "Verity",
                 "Options",
                 "Selections",
@@ -1613,10 +1613,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When importing spreadsheet data into ServiceNow, in which step does the data get written to the receiving table?",
             "correct_answers": [
-                "Execute Transform"
+                "Run Transform"
             ],
             "incorrect_answers": [
-                "Run Transform",
+                "Execute Transform",
                 "Run Import",
                 "Import Dataset",
                 "Schedule Transform"
@@ -1757,11 +1757,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which module is used to access the knowledge bases which are available to you?",
             "correct_answers": [
-                "Knowledge > Knowledge Bases"
+                "Self Service > Knowledge"
             ],
             "incorrect_answers": [
                 "Knowledge > Home",
-                "Self Service > Knowledge",
+                "Knowledge > Knowledge Bases",
                 "Knowledge > All",
                 "Knowledge > Overview"
             ]
@@ -1829,12 +1829,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which module is used as the first step for importing data?",
             "correct_answers": [
-                "Import Data"
+                "Load Data"
             ],
             "incorrect_answers": [
                 "Coalesce Data",
                 "Transform Data",
-                "Load Data"
+                "Import Data"
             ]
         },
         {
@@ -1842,11 +1842,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When you need to orchestrate business processes across services with little technical user knowledge, which utility would you use?",
             "correct_answers": [
-                "Flow Editor"
+                "Flow Designer"
             ],
             "incorrect_answers": [
                 "Flow Manager",
-                "Flow Designer",
+                "Flow Editor",
                 "Workflow Editor",
                 "Workflow Designer"
             ]
@@ -1856,12 +1856,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When a user reports that they are not able to see modules on the application navigator, what can you do, to see what modules are visible to them?",
             "correct_answers": [
-                "Initiate a Connect Chat session"
+                "Impersonate the user"
             ],
             "incorrect_answers": [
                 "Look up their password, so you can login with their account",
                 "Install the Bomgar plug-in",
-                "Impersonate the user",
+                "Initiate a Connect Chat session",
                 "Launch a NowChat window"
             ]
         },
@@ -1870,10 +1870,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What is a key difference between Reporting and Performance Analytics?",
             "correct_answers": [
-                "Performance Analytics can show trends; Reports cannot."
+                "Performance Analytics contains snapshots of data taken over time; Reporting shows only the data as it is, at the moment the report is run."
             ],
             "incorrect_answers": [
-                "Performance Analytics contains snapshots of data taken over time; Reporting shows only the data as it is, at the moment the report is run.",
+                "Performance Analytics can show trends; Reports cannot.",
                 "Reports can be run on a scheduled basis; Performance Analytics cannot.",
                 "Performance Analytics data can be published to Dashboards; Reports cannot.",
                 "Performance Analytics shows KPIs; Reporting does not."
@@ -1927,17 +1927,17 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "On the Reports page, what sections allow you to see which reports are visible to different audiences? (Choose four.)",
             "correct_answers": [
-                "Group",
-                "Dashboards",
-                "Global",
-                "Admin"
+                "My reports",
+				"Global",
+                "All",
+				"Group",
             ],
             "incorrect_answers": [
-                "Department",
-                "My reports",
+                "Dashboards",                
+                "Admin"
+                "Department",                
                 "Team",
                 "Analytics",
-                "All",
                 "Company"
             ]
         },
@@ -2506,11 +2506,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What are examples of Core tables in the ServiceNow platform?",
             "correct_answers": [
-                "Configuration, Connect, Chat"
+                "User, Task, Incident"
             ],
             "incorrect_answers": [
                 "Team, Party, Awards",
-                "User, Task, Incident",
+                "Configuration, Connect, Chat",
                 "Work, Caller, Timecard"
             ]
         },
@@ -3036,12 +3036,12 @@ const CSA_EXAM = {
             "correct_answers": [
                 "List Links",
                 "List Buttons",
-                "List Override",
-                "List Control"
-            ],
-            "incorrect_answers": [
                 "List Choices",
                 "List Context Menu"
+            ],
+            "incorrect_answers": [
+                "List Override",
+                "List Control"
             ]
         },
         {
@@ -3370,7 +3370,7 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "On the knowledge base record, which tab would you use to define which users are not able to write articles to the knowledge base?",
             "correct_answers": [
-                "Can Contribute"
+                "Cannot Contribute"
             ],
             "incorrect_answers": [
                 "Cannot Author",
@@ -3651,12 +3651,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "A customer wants to be able to identify and track components of their infrastructure that support their eCommerce service. What ServiceNow products could support this requirement? (Choose three.)",
             "correct_answers": [
-                "Asset Management",
+                "Discovery",
                 "Configuration Management (CMDB)",
                 "Service Mapping"
             ],
             "incorrect_answers": [
-                "Discovery",
+                "Asset Management",
                 "Performance Analytics"
             ]
         },
@@ -3710,12 +3710,12 @@ const CSA_EXAM = {
             "question": "When selecting the Target table for an import, which tables can you select? (Choose three.)",
             "correct_answers": [
                 "Tables within the global scope",
-                "Tables which allow write access to other applications",
+                "Related tables, using Dot Walk",
                 "Tables within the existing application scope"
             ],
             "incorrect_answers": [
                 "Tables outside of ServiceNow",
-                "Related tables, using Dot Walk"
+                "Tables which allow write access to other applications"
             ]
         },
         {
@@ -3750,12 +3750,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When you set a policy that is applied to all data entered into the platform (UI, Import Sets, or Web Services), where does this policy run by default?",
             "correct_answers": [
-                "Client"
+                "Server"
             ],
             "incorrect_answers": [
                 "Network",
                 "Browser",
-                "Server"
+                "Client"
             ]
         },
         {
@@ -3831,11 +3831,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "You are editing a new incident record and would like the \"Save\" button to be located on the Form header. Which action would need to be taken for that button to appear?",
             "correct_answers": [
-                "Context Menu > Form Design > add the “Save” button."
+                "All > System Properties > UI Properties > Turn on the “Save” button."
             ],
             "incorrect_answers": [
                 "All > System Properties > UI Properties > Turn on the “glide.ui.advanced” property.",
-                "All > System Properties > UI Properties > Turn on the “Save” button.",
+                "Context Menu > Form Design > add the “Save” button.",
                 "Context Meru > Form Layout > add the “Save” button."
             ]
         },
@@ -3884,13 +3884,13 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which system property is added and set to true in order to see impersonation events in the System Log?",
             "correct_answers": [
-                "glide.sys.admin_login"
+                "glide.sys.log_impersonation"
             ],
             "incorrect_answers": [
                 "glide.sys.all_impersonation",
                 "glide.user_setting",
                 "glide.impersonation_setting",
-                "glide.sys.log_impersonation"
+                "glide.sys.admin_login"
             ]
         },
         {
@@ -3912,12 +3912,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "A colleague wants to rearrange the columns on their My Work List. Once the user has navigated to the list, where should they navigate to select and arrange the columns?",
             "correct_answers": [
-                "Click List Context Menu > Personalize List"
+                "Click Personalize List"
             ],
             "incorrect_answers": [
                 "Right click on any column header, Context Menu > Configure > List Layout",
                 "Click List Context Menu > Configure > List Layout",
-                "Click Personalize List"
+                "Click List Context Menu > Personalize List"
             ]
         },
         {
@@ -3925,12 +3925,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "You are looking at a list of Active Incidents. You want to exclude Incidents with the state of Resolved. How might you do that?",
             "correct_answers": [
-                "Click Funnel icon, click AND, Select Resolved, is Not, State, click Run"
+                "On the list of records, locate and right-click on the Resolved value, select Filter Out"
             ],
             "incorrect_answers": [
                 "On Search, select State, type not Resolved, press enter",
                 "On State column title, right-click, select Filter Out > Resolved",
-                "On the list of records, locate and right-click on the Resolved value, select Filter Out",
+                "Click Funnel icon, click AND, Select Resolved, is Not, State, click Run",
                 "On the list of records, locate and right-click on the Resolved value, select Exclude"
             ]
         },
@@ -3966,13 +3966,13 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which data consistency settings can be achieved using UI Policy? (Choose three.)",
             "correct_answers": [
-                "Setting fields to accept the data in an expected format",
-                "Setting fields to accept the data with ‘n’ number of characters",
+                "Setting fields hidden",
+                "Setting fields mandatory",
                 "Settings fields read-only"
             ],
             "incorrect_answers": [
-                "Setting fields hidden",
-                "Setting fields mandatory"
+                "Setting fields to accept the data in an expected format",
+                "Setting fields to accept the data with ‘n’ number of characters"
             ]
         },
         {
@@ -4020,12 +4020,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "An order for new office equipment has been placed through the Service Catalog. How would you view the lists of requests after the orders have been placed?",
             "correct_answers": [
-                "All > Service Catalog > Requests"
+                "All > Service Catalog > Open Records > Items"
             ],
             "incorrect_answers": [
                 "All > Tables and Columns > Tasks",
                 "In the Navigation Filter, type “requests.list\" and press the Enter key",
-                "All > Service Catalog > Open Records > Items"
+                "All > Service Catalog > Requests"
             ]
         },
         {
@@ -4073,11 +4073,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "When moving multiple update sets at one time, what might you do to facilitate the move?",
             "correct_answers": [
-                "Map"
+                "Batch"
             ],
             "incorrect_answers": [
                 "Preview",
-                "Batch",
+                "Map",
                 "List"
             ]
         },
@@ -4086,12 +4086,12 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What do you click when you have made modifications to your report, and you want to see the results without saving?",
             "correct_answers": [
-                "Try It"
+                "Run"
             ],
             "incorrect_answers": [
                 "Preview",
                 "Test",
-                "Run",
+                "Try It",
                 "Execute"
             ]
         },
@@ -4100,10 +4100,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which framework can automatically populate values for the Priority and Category fields based on the Short description field value?",
             "correct_answers": [
-                "Assignment Rule"
+                "Predictive Intelligence"
             ],
             "incorrect_answers": [
-                "Predictive Intelligence",
+                "Assignment Rule",
                 "CSDM",
                 "Action",
                 "UI Policy"
@@ -4236,11 +4236,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which ServiceNow utility provides a modern interactive graphical interface to visualize configuration items and their relationships?",
             "correct_answers": [
-                "CI Class Map"
+                "Dependency View"
             ],
             "incorrect_answers": [
                 "Flow Design",
-                "Dependency View",
+                "CI Class Map",
                 "Business Service Map"
             ]
         },
@@ -4288,10 +4288,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which allows the creation of a task-based record from Service Catalog?",
             "correct_answers": [
-                "UI Actions"
+                "Record Producers"
             ],
             "incorrect_answers": [
-                "Record Producers",
+                "UI Actions",
                 "UI Builder",
                 "Assignment Rule",
                 "Flow Designer"
@@ -4302,10 +4302,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "On the knowledge base record, which tab would you use to define which users are able to write articles to the knowledge base?",
             "correct_answers": [
-                "Can Author"
+                "Can Contribute"
             ],
             "incorrect_answers": [
-                "Can Contribute",
+                "Can Author",
                 "Cannot Author",
                 "Can Read",
                 "Can Write"
