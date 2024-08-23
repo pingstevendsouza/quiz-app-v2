@@ -1406,7 +1406,7 @@ const CSA_EXAM = {
             "question": "When testing a catalog item, having a manager approval flows, which of these best practices would you follow? (Choose three.)",
             "correct_answers": [
                 "Make sure the latest flows are activated.",
-                "Impersonate the requester to ensure the form works."
+                "Impersonate the requester to ensure the form works.",
                 "Make sure the requester's user record has a manager specified.",
             ],
             "incorrect_answers": [
@@ -1934,7 +1934,7 @@ const CSA_EXAM = {
             ],
             "incorrect_answers": [
                 "Dashboards",                
-                "Admin"
+                "Admin",
                 "Department",                
                 "Team",
                 "Analytics",
