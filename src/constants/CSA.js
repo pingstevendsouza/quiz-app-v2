@@ -4403,7 +4403,7 @@ const CSA_EXAM = {
             "incorrect_answers": [
                 "Select the record using the check box, then select the Person icon",
                 "Select the record using the check box then select the Assign To Me UI action on the List Header",
-                "Select the Task number, and select the Assign to me UI action on the form"
+                "Select the Task number, and select the Assign to me UI action on the form",
             ]
         },
         {
