@@ -956,10 +956,10 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "Which of the following statements describes how data is organized in a table?",
             "correct_answers": [
-                "A column is a field in the database and a record is one user"
+                "A column is one field and a record is one row"
             ],
             "incorrect_answers": [
-                "A column is one field and a record is one row",
+                "A column is a field in the database and a record is one user",
                 "A column is one field and a record is one column",
                 "A column contains data from one user and a record is one set of fields"
             ]
@@ -1303,16 +1303,17 @@ const CSA_EXAM = {
             "question": "What needs to be specified, when creating a Business Rule? (Choose four.)",
             "correct_answers": [
                 "Table",
-                "Fields to update",
-                "Who can run",
-                "Timing"
+                "Script to run",
+                "Timing",
+                "Condition to evaluate"
+                
             ],
             "incorrect_answers": [
                 "UI action",
-                "Script to run",
                 "Update set",
                 "Application scope",
-                "Condition to evaluate"
+                "Who can run",
+                "Fields to update"
             ]
         },
         {
@@ -1729,13 +1730,13 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "What component causes a flow to run after a record has been created or updated?",
             "correct_answers": [
-                "Updated-date trigger"
+                "Record-based trigger"
             ],
             "incorrect_answers": [
                 "Date-based trigger",
                 "On-change trigger",
-                "Record-based trigger",
-                "Application-based trigger"
+                "Application-based trigger",
+                "Updated-date trigger"
             ]
         },
         {
@@ -2071,12 +2072,12 @@ const CSA_EXAM = {
             "correct_answers": [
                 "Local Sources (i.e. XML, CSV, Excel)",
                 "DataHub",
-                "JDBC Connection",
+                "Network Server",
                 "LDAP Connection"
             ],
             "incorrect_answers": [
                 "Implementation Spoke",
-                "Network Server"
+                "JDBC Connection"
             ]
         },
         {
@@ -3490,11 +3491,11 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "As administrator, what must you do to access features of High Security Settings?",
             "correct_answers": [
-                "Add security_admin role to your user account"
+                "Select Elevate Roles"
             ],
             "incorrect_answers": [
                 "Impersonate Security Admin",
-                "Select Elevate Roles",
+                "Add security_admin role to your user account",
                 "Use System Administration > Elevate Roles module"
             ]
         },
@@ -4396,13 +4397,13 @@ const CSA_EXAM = {
             "category": "CSA",
             "question": "If users would like to locate and assign a task to themselves in the Platform, what action could they perform from the list view to make the assignment? (Choose two.)",
             "correct_answers": [
-                "Select the record using the check box then select the Assign To Me UI action on the List Header",
-                "Select the Task number, and select the Assign to me UI action on the form"
+                "Double click on the Assigned to value, type the name of the user, and select the green check",
+                "Right click on the Task number and select the Assign to me option in the menu"
             ],
             "incorrect_answers": [
                 "Select the record using the check box, then select the Person icon",
-                "Double click on the Assigned to value, type the name of the user, and select the green check",
-                "Right click on the Task number and select the Assign to me option in the menu"
+                "Select the record using the check box then select the Assign To Me UI action on the List Header",
+                "Select the Task number, and select the Assign to me UI action on the form"
             ]
         },
         {
