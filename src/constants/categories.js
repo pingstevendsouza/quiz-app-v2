@@ -11,14 +11,20 @@ const CATEGORIES = [
   },
   {
     key: 3,
-    text: 'ServiceNow CIS - IRM',
+    text: 'ServiceNow CIS - ITSM',
     value: 3,
   },
   {
     key: 4,
-    text: 'ServiceNow CIS - VRM',
+    text: 'ServiceNow CIS - IRM',
     value: 4,
+  },
+  {
+    key: 5,
+    text: 'ServiceNow CIS - VRM',
+    value: 5,
   }
+  
   // },
   // {
   //   key: 12,

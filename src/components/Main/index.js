@@ -62,19 +62,29 @@ const Main = ({ startQuiz }) => {
     allFieldsSelected = true;
   }
 
-  const fetchData = () => {
+  const fetchData =async () => {
     
 
     if (error) setError(null);
     let data={};
-    if(category===1)
-      data=CSA_EXAM;
-    else if (category===2)
-      data=CAD_EXAM;
+    if(category===1){
+      const response = await fetch('/exams/CSA.json');
+      debugger;
+      data = await response.json();
+    }
+    else if (category===2){
+      const response = await fetch('/exams/CAD.json');
+      data = await response.json()
+    }
+    else if (category===3){
+      const response = await fetch('/exams/ITSM.json');
+      data = await response.json()
+    }
     else{
       alert("Not yet implemented, please wait or try again later");
       return;
     }
+
     setProcessing(true);
     //const API = `https://opentdb.com/api.php?amount=${numOfQuestions}&category=${category}&difficulty=${difficulty}&type=${questionsType}`;
 
