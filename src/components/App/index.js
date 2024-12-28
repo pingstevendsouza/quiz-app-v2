@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import Layout from '../Layout';
 import Loader from '../Loader';
+import Upload from '../Upload';
 import Main from '../Main';
 import Quiz from '../Quiz';
 import Result from '../Result';
@@ -16,6 +17,11 @@ const App = () => {
   const [isQuizStarted, setIsQuizStarted] = useState(false);
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
   const [resultData, setResultData] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const handleMenuSelect = (item) => {
+    setSelectedItem(item); // Update the selected item
+  };
 
   const startQuiz = (data, countdownTime) => {
     setLoading(true);
@@ -87,15 +93,16 @@ const App = () => {
   };
 
   return (
-    <Layout>
+    <Layout onMenuSelect={handleMenuSelect}>
       {loading && <Loader {...loadingMessage} />}
-      {!loading && !isQuizStarted && !isQuizCompleted && (
+      {!loading && selectedItem=='Update' && !isQuizStarted && !isQuizCompleted && <Upload /> }
+      {!loading && !isQuizStarted && !isQuizCompleted && selectedItem!='Update'&& (
         <Main startQuiz={startQuiz} />
       )}
-      {!loading && isQuizStarted && (
+      {!loading && isQuizStarted && selectedItem!='Update' && (
         <Quiz data={data} countdownTime={countdownTime} endQuiz={endQuiz} />
       )}
-      {!loading && isQuizCompleted && (
+      {!loading && isQuizCompleted && selectedItem!='Update' && (
         <Result {...resultData} replayQuiz={replayQuiz} resetQuiz={resetQuiz} />
       )}
     </Layout>

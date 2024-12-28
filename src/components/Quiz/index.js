@@ -190,8 +190,6 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
                     {data[questionIndex].options.map((option, i) => {
                       const letter = getLetter(i);
                       const decodedOption = he.decode(option);
-                      
-                      
                       return (
                         <Menu.Item
                           key={decodedOption}
@@ -216,7 +214,6 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
                                 myCheck[questionIndex][i]=data.checked;
                               }
                               setChecked(myCheck); 
-
                               checkBoxOnChange(data,i,decodedOption);
 
                             }}

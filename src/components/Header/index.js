@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { Menu, Button } from 'semantic-ui-react';
+import { Menu, Button, Dropdown,DropdownMenu,DropdownHeader,DropdownItem,DropdownDivider,ButtonGroup } from 'semantic-ui-react';
 
-const Header = () => {
+const Header = ({ onMenuSelect }) => {
   const [promptEvent, setPromptEvent] = useState(null);
   const [appAccepted, setAppAccepted] = useState(false);
+
+  const handleItemClick = (item) => {
+    onMenuSelect(item); // Pass the selected item to the App component
+  };
 
   let isAppInstalled = false;
 
@@ -32,6 +36,22 @@ const Header = () => {
     <Menu stackable inverted>
       <Menu.Item header>
         <h1>ServiceNow Quiz</h1>
+      </Menu.Item>
+      <Menu.Item position='left'>
+        <Dropdown
+          floating
+          icon='setting'
+       >
+      <Dropdown.Menu>
+        <Dropdown.Header>Exams</Dropdown.Header>
+        <Dropdown.Item onClick={() => handleItemClick('Create')}>Create</Dropdown.Item>
+        <Dropdown.Item onClick={() => handleItemClick('Update')}>Update</Dropdown.Item>
+        {/* <DropdownDivider />
+        <DropdownHeader>Others</DropdownHeader>
+        <DropdownItem>N/A</DropdownItem>
+        <DropdownItem>N/A</DropdownItem> */}
+      </Dropdown.Menu>
+    </Dropdown>
       </Menu.Item>
       {promptEvent && !isAppInstalled && (
         <Menu.Item position="right">
