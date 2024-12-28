@@ -11,15 +11,8 @@ const redis = createClient({
   token: process.env.UPSTASH_REDIS_TOKEN,
 });
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb', // Limit request size to 1MB
-    },
-  },
-};
-
-export default async function handler(req, res) {
+// Update to CommonJS export
+module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     try {
       const { filename, content, category } = req.body;
@@ -43,4 +36,13 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-}
+};
+
+// Use this config setup if you want to modify request/response size limits
+module.exports.config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb', // Limit request size to 1MB
+    },
+  },
+};
