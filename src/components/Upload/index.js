@@ -1,48 +1,34 @@
 import React, { useState } from 'react';
-import {
-  Container,
-  Segment,
-  Item,
-  Button,
-  Message,
-  Icon,
-  Form,
-  Divider,
-  Dropdown
-} from 'semantic-ui-react';
-import {
-  CATEGORIES
-} from '../../constants';
+import { Container, Segment, Item, Divider, Button, Message, Icon, Form } from 'semantic-ui-react';
 
 const UploadJSON = () => {
   const [message, setMessage] = useState('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [category, setCategory] = useState(1);
-  const [processing, setProcessing] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setMessage('');
-    if (file && file.type === 'application/json') {
-      setSelectedFile(file);
-    } else {
-      setMessage('Please upload a valid JSON file.');
-      setSelectedFile(null);
-    }
+    setSelectedFile(file);
+    setUploadSuccess(false);
   };
 
-  const handleUpload = async () => {
+  const handleUpload = async (event) => {
     if (!selectedFile) {
-      setMessage('No file selected.');
+      setMessage('Please select a file first.');
+      return;
+    }
+
+    if (selectedFile.type !== 'application/json') {
+      setMessage('Please upload a valid JSON file.');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = async () => {
       try {
-        const fileName = selectedFile.name; // Use the original file name
+        const fileName = selectedFile.name;
         const content = JSON.parse(reader.result);
 
         const response = await fetch('/api/upload-json', {
@@ -53,14 +39,17 @@ const UploadJSON = () => {
           body: JSON.stringify({ filename: fileName, content }),
         });
 
+        const data = await response.json();
+
         if (response.ok) {
           setMessage('File uploaded successfully!');
-          setUploadedFileUrl(`${window.location.origin}/${fileName}`);
+          setUploadedFileUrl(`https://drive.google.com/file/d/${data.fileId}`);
+          setUploadSuccess(true);
         } else {
-          setMessage('Failed to upload file.');
+          setMessage(data.error || 'Failed to upload file.');
         }
       } catch (error) {
-        setMessage('Error reading or uploading file.');
+        setMessage('Error uploading file.');
       }
     };
 
@@ -84,41 +73,26 @@ const UploadJSON = () => {
     event.stopPropagation();
     setDragActive(false);
 
-    const file = event.dataTransfer.files[0];
-    if (file && file.type === 'application/json') {
-      setSelectedFile(file);
-      setMessage('');
-    } else {
-      setMessage('Please upload a valid JSON file.');
-      setSelectedFile(null);
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      setSelectedFile(files[0]);
+      setUploadSuccess(false);
     }
   };
 
   return (
     <Container>
       <Segment>
-        <Item.Group>
+        <Item.Group divided>
           <Item>
             <Item.Content>
               <Item.Header>
-                <h1>Upload Questions</h1>
+                <h1>Upload JSON File</h1>
               </Item.Header>
               <Divider />
+
               <Form>
                 <Form.Field>
-                <p>Select Exam?</p>
-                <Dropdown
-                  fluid
-                  selection
-                  name="category"
-                  placeholder="Select Exam"
-                  header="Select Exam"
-                  options={CATEGORIES}
-                  value={category}
-                  onChange={(e, { value }) => setCategory(value)}
-                  disabled={processing}
-                />
-                <br />
                   <label>Drag and Drop File Upload</label>
                   <Segment
                     placeholder
@@ -132,24 +106,10 @@ const UploadJSON = () => {
                       textAlign: 'center',
                     }}
                   >
-                    <Icon
-                      name="cloud upload"
-                      size="huge"
-                      color={dragActive ? 'teal' : 'grey'}
-                    />
-                    <p>
-                      {dragActive
-                        ? 'Drop your file here!'
-                        : 'Drag your file here or click below to select a file'}
-                    </p>
+                    <Icon name="cloud upload" size="huge" color={dragActive ? 'teal' : 'grey'} />
+                    <p>{dragActive ? 'Drop your file here!' : 'Drag your file here or click below to select a file'}</p>
                   </Segment>
-                  <input
-                    type="file"
-                    id="file"
-                    hidden
-                    accept=".json"
-                    onChange={handleFileChange}
-                  />
+                  <input type="file" id="file" hidden onChange={handleFileChange} />
                   <Button as="label" htmlFor="file" type="button" color="teal">
                     Choose File
                   </Button>
@@ -157,30 +117,23 @@ const UploadJSON = () => {
                     {selectedFile ? selectedFile.name : 'No file chosen'}
                   </span>
                 </Form.Field>
-                <Button
-                  type="button"
-                  color="blue"
-                  onClick={handleUpload}
-                  disabled={!selectedFile}
-                >
+
+                <Button type="button" color="blue" onClick={handleUpload} disabled={!selectedFile}>
                   Upload
                 </Button>
+
+                {uploadSuccess && (
+                  <Message positive>
+                    <Message.Header>File Uploaded Successfully!</Message.Header>
+                    <p>{selectedFile.name} has been uploaded.</p>
+                    <p>View it on Google Drive: <a href={uploadedFileUrl} target="_blank" rel="noopener noreferrer">{uploadedFileUrl}</a></p>
+                  </Message>
+                )}
+
+                {message && (
+                  <Message error={message.includes('Error')} success={message.includes('successfully')} content={message} />
+                )}
               </Form>
-              {message && (
-                <Message color={message.includes('successfully') ? 'green' : 'red'}>
-                  {message}
-                </Message>
-              )}
-              {uploadedFileUrl && (
-                <Message positive>
-                  <Message.Header>File URL</Message.Header>
-                  <p>
-                    <a href={uploadedFileUrl} target="_blank" rel="noopener noreferrer">
-                      {uploadedFileUrl}
-                    </a>
-                  </p>
-                </Message>
-              )}
             </Item.Content>
           </Item>
         </Item.Group>
