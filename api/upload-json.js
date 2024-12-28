@@ -1,5 +1,6 @@
-import { createClient } from '@upstash/redis';
-import { config } from 'dotenv';
+// Use require instead of import
+const { createClient } = require('@upstash/redis');
+const { config } = require('dotenv');
 
 // Load environment variables
 config();

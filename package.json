@@ -11,6 +11,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "dotenv": "^16.4.7",
     "googleapis": "^144.0.0",
     "he": "^1.2.0",
     "prop-types": "^15.8.1",
