@@ -3,102 +3,151 @@ import {
   Container,
   Segment,
   Item,
-  Divider,
   Button,
   Message,
   Icon,
-  Form
+  Form,
+  Divider,
+  Dropdown
 } from 'semantic-ui-react';
+import {
+  CATEGORIES
+} from '../../constants';
 
 const UploadJSON = () => {
   const [message, setMessage] = useState('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-
-  // Redirect the user to Google OAuth 2.0 login
-  const handleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`;
-  };
+  const [category, setCategory] = useState(1);
+  const [processing, setProcessing] = useState(false);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file);
-    setUploadSuccess(false);
+    setMessage('');
+    if (file && file.type === 'application/json') {
+      setSelectedFile(file);
+    } else {
+      setMessage('Please upload a valid JSON file.');
+      setSelectedFile(null);
+    }
   };
 
   const handleUpload = async () => {
-    const file = selectedFile;
-    if (!file || file.type !== 'application/json') {
-      setMessage('Please upload a valid JSON file.');
+    if (!selectedFile) {
+      setMessage('No file selected.');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const fileName = selectedFile.name; // Use the original file name
+        const content = JSON.parse(reader.result);
 
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/upload-json`, {
-        method: 'POST',
-        body: formData,
-      });
+        const response = await fetch('/api/upload-json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ filename: fileName, content }),
+        });
 
-      if (response.ok) {
-        const responseData = await response.json();
-        setMessage('File uploaded successfully!');
-        setUploadedFileUrl(`https://drive.google.com/file/d/${responseData.fileId}/view`);
-      } else {
-        setMessage('Failed to upload file.');
+        if (response.ok) {
+          setMessage('File uploaded successfully!');
+          setUploadedFileUrl(`${window.location.origin}/${fileName}`);
+        } else {
+          setMessage('Failed to upload file.');
+        }
+      } catch (error) {
+        setMessage('Error reading or uploading file.');
       }
-    } catch (error) {
-      setMessage('Error uploading file.');
+    };
+
+    reader.readAsText(selectedFile);
+  };
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragActive(false);
+
+    const file = event.dataTransfer.files[0];
+    if (file && file.type === 'application/json') {
+      setSelectedFile(file);
+      setMessage('');
+    } else {
+      setMessage('Please upload a valid JSON file.');
+      setSelectedFile(null);
     }
   };
 
   return (
     <Container>
       <Segment>
-        <Item.Group divided>
+        <Item.Group>
           <Item>
             <Item.Content>
               <Item.Header>
-                <h1>Upload JSON File to Google Drive</h1>
+                <h1>Upload Questions</h1>
               </Item.Header>
-              <Divider />
-
-              {/* Google OAuth Login Button */}
-              <Button onClick={handleLogin}>Login with Google</Button>
-
               <Divider />
               <Form>
                 <Form.Field>
+                <p>Select Exam?</p>
+                <Dropdown
+                  fluid
+                  selection
+                  name="category"
+                  placeholder="Select Exam"
+                  header="Select Exam"
+                  options={CATEGORIES}
+                  value={category}
+                  onChange={(e, { value }) => setCategory(value)}
+                  disabled={processing}
+                />
+                <br />
                   <label>Drag and Drop File Upload</label>
                   <Segment
                     placeholder
-                    onDragEnter={(e) => setDragActive(true)}
-                    onDragLeave={(e) => setDragActive(false)}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
                     onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setDragActive(false);
-                      const file = e.dataTransfer.files[0];
-                      setSelectedFile(file);
-                    }}
+                    onDrop={handleDrop}
                     style={{
                       border: dragActive ? '2px dashed teal' : '2px dashed grey',
                       padding: '20px',
                       textAlign: 'center',
                     }}
                   >
-                    <Icon name="cloud upload" size="huge" color={dragActive ? 'teal' : 'grey'} />
-                    <p>{dragActive ? 'Drop your file here!' : 'Drag your file here or click below to select a file'}</p>
+                    <Icon
+                      name="cloud upload"
+                      size="huge"
+                      color={dragActive ? 'teal' : 'grey'}
+                    />
+                    <p>
+                      {dragActive
+                        ? 'Drop your file here!'
+                        : 'Drag your file here or click below to select a file'}
+                    </p>
                   </Segment>
                   <input
                     type="file"
                     id="file"
                     hidden
+                    accept=".json"
                     onChange={handleFileChange}
                   />
                   <Button as="label" htmlFor="file" type="button" color="teal">
@@ -116,9 +165,22 @@ const UploadJSON = () => {
                 >
                   Upload
                 </Button>
-
-                {message && <Message>{message}</Message>}
               </Form>
+              {message && (
+                <Message color={message.includes('successfully') ? 'green' : 'red'}>
+                  {message}
+                </Message>
+              )}
+              {uploadedFileUrl && (
+                <Message positive>
+                  <Message.Header>File URL</Message.Header>
+                  <p>
+                    <a href={uploadedFileUrl} target="_blank" rel="noopener noreferrer">
+                      {uploadedFileUrl}
+                    </a>
+                  </p>
+                </Message>
+              )}
             </Item.Content>
           </Item>
         </Item.Group>
