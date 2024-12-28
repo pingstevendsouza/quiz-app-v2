@@ -1,23 +1,4 @@
 import { google } from 'googleapis';
-import { OAuth2Client } from 'google-auth-library';
-import fs from 'fs';
-import path from 'path';
-
-const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
-const TOKEN_PATH = path.join(process.cwd(), 'token.json'); // Token file for OAuth2 credentials
-
-const auth = new google.auth.OAuth2(
-  process.env.CLIENT_ID, 
-  process.env.CLIENT_SECRET, 
-  process.env.REDIRECT_URI
-);
-
-// Load OAuth2 credentials (from token.json) and authorize
-const authorize = async () => {
-  const credentials = JSON.parse(fs.readFileSync(TOKEN_PATH, 'utf-8'));
-  auth.setCredentials(credentials);
-  return google.drive({ version: 'v3', auth });
-};
 
 export const config = {
   api: {
@@ -30,17 +11,26 @@ export const config = {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { filename, content } = req.body;
+      // Extract the authorization code and file content from the request
+      const { code, content, filename } = req.body;
 
-      if (!filename || !content) {
+      if (!code || !content || !filename) {
         return res.status(400).json({ error: 'Invalid request payload.' });
       }
 
-      // Generate a buffer from the content to simulate file creation
-      const buffer = Buffer.from(JSON.stringify(content, null, 2));
+      // Initialize the OAuth2 client with your credentials
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.CLIENT_ID,
+        process.env.CLIENT_SECRET,
+        process.env.REDIRECT_URI
+      );
 
-      // Authenticate and upload file to Google Drive
-      const drive = await authorize();
+      // Get the OAuth2 token using the authorization code
+      const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
+
+      // Use the token to interact with Google Drive API
+      const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
       const fileMetadata = {
         name: filename,
@@ -49,23 +39,20 @@ export default async function handler(req, res) {
 
       const media = {
         mimeType: 'application/json',
-        body: buffer,
+        body: JSON.stringify(content),
       };
 
+      // Upload the file to Google Drive
       const file = await drive.files.create({
         resource: fileMetadata,
         media: media,
-        fields: 'id, name',
+        fields: 'id',
       });
 
-      res.status(200).json({
-        message: 'File uploaded successfully.',
-        fileId: file.data.id,
-        fileName: file.data.name,
-      });
+      return res.status(200).json({ message: 'File uploaded successfully', fileId: file.data.id });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Failed to upload file to Google Drive.' });
+      console.error('Error during file upload:', error);
+      return res.status(500).json({ error: 'Failed to upload the file to Google Drive.' });
     }
   } else {
     res.setHeader('Allow', ['POST']);
