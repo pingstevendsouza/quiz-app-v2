@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Invalid request payload.' });
       }
 
-      const targetPath = path.join(process.cwd(), 'public/exams', filename);
+      const targetPath = path.join(process.cwd(), './', filename);
 
       // Save the JSON content to the public folder
       fs.writeFileSync(targetPath, JSON.stringify(content, null, 2));
