@@ -10,9 +10,7 @@ import {
   Divider,
   Dropdown
 } from 'semantic-ui-react';
-import {
-  CATEGORIES
-} from '../../constants';
+import { CATEGORIES } from '../../constants';
 
 const UploadJSON = () => {
   const [message, setMessage] = useState('');
@@ -50,12 +48,16 @@ const UploadJSON = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ filename: fileName, content }),
+          body: JSON.stringify({
+            filename: fileName,
+            content,
+            category
+          }),
         });
 
         if (response.ok) {
           setMessage('File uploaded successfully!');
-          setUploadedFileUrl(`${window.location.origin}/${fileName}`);
+          setUploadedFileUrl(`${window.location.origin}/uploads/${fileName}`);
         } else {
           setMessage('Failed to upload file.');
         }
@@ -106,19 +108,18 @@ const UploadJSON = () => {
               <Divider />
               <Form>
                 <Form.Field>
-                <p>Select Exam?</p>
-                <Dropdown
-                  fluid
-                  selection
-                  name="category"
-                  placeholder="Select Exam"
-                  header="Select Exam"
-                  options={CATEGORIES}
-                  value={category}
-                  onChange={(e, { value }) => setCategory(value)}
-                  disabled={processing}
-                />
-                <br />
+                  <p>Select Exam?</p>
+                  <Dropdown
+                    fluid
+                    selection
+                    name="category"
+                    placeholder="Select Exam"
+                    options={CATEGORIES}
+                    value={category}
+                    onChange={(e, { value }) => setCategory(value)}
+                    disabled={processing}
+                  />
+                  <br />
                   <label>Drag and Drop File Upload</label>
                   <Segment
                     placeholder

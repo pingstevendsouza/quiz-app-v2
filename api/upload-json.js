@@ -1,5 +1,14 @@
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@upstash/redis';
+import { config } from 'dotenv';
+
+// Load environment variables
+config();
+
+// Initialize Upstash Redis client
+const redis = createClient({
+  url: process.env.UPSTASH_REDIS_URL,
+  token: process.env.UPSTASH_REDIS_TOKEN,
+});
 
 export const config = {
   api: {
@@ -12,20 +21,22 @@ export const config = {
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     try {
-      const { filename, content } = req.body;
+      const { filename, content, category } = req.body;
 
       if (!filename || !content) {
         return res.status(400).json({ error: 'Invalid request payload.' });
       }
 
-      const targetPath = path.join(process.cwd(), './', filename);
+      // Create a unique Redis key (could include category or filename)
+      const redisKey = `upload:${category}:${filename}`;
 
-      // Save the JSON content to the public folder
-      fs.writeFileSync(targetPath, JSON.stringify(content, null, 2));
+      // Save the JSON content as a string in Redis
+      await redis.set(redisKey, JSON.stringify(content));
 
       return res.status(200).json({ message: 'File uploaded successfully.' });
     } catch (error) {
-      return res.status(500).json({ error: 'Failed to save the file.' });
+      console.error(error);
+      return res.status(500).json({ error: 'Failed to save the file in Redis.' });
     }
   } else {
     res.setHeader('Allow', ['POST']);
