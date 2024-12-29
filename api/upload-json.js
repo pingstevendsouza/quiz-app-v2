@@ -51,8 +51,8 @@ export default async function handler(req, res) {
 
       // Return the file content as JSON
 
-      console.error(fileData)
-      const parsedData = JSON.parse(fileData);
+      console.log(fileData)
+      const parsedData = fileData;//JSON.parse(fileData);
       return res.status(200).json({ filename, content: parsedData });
     } catch (error) {
       console.error('Error retrieving file:', error);
