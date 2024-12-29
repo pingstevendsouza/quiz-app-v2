@@ -35,7 +35,7 @@ const UploadJSON = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ filename: `${exam}.json` }), // Pass the filename for download
+        body: JSON.stringify({ filename: `${exam}.json`, type:"download" }), // Pass the filename for download
       });
 
       if (response.ok) {
@@ -100,7 +100,7 @@ const UploadJSON = () => {
           body: JSON.stringify({
             filename: fileName,
             content,
-            exam,
+            type:"upload"
           }),
         });
 

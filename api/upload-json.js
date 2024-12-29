@@ -16,7 +16,7 @@ const redis = new Redis({
 });
 
 export default async function handler(req, res) {
-  if (req.method === 'POST') {
+  if (req.method === 'POST' && req.body.type=="upload" ) {
     // Handle file upload
     const { filename, content, exam } = req.body;
 
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       console.error('Error uploading file:', error);
       return res.status(500).json({ error: 'Failed to save the file.' });
     }
-  } else if (req.method === 'POST' && req.body.filename) {
+  } else if (req.method === 'POST' && req.body.type=="download") {
     // Handle file download
     const { filename } = req.body; // Get filename from the request body
 
