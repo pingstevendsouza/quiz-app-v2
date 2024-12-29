@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       }
 
       // Parse the stored JSON data (if it's in JSON format)
-      console.log(fileData)
+      console.error(fileData)
       const parsedData = JSON.parse(fileData);
 
       return res.status(200).json({ filename:filename, content: parsedData });
