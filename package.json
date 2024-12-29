@@ -21,7 +21,8 @@
     "react-scripts": "^5.0.1",
     "semantic-ui-css": "^2.5.0",
     "semantic-ui-react": "^2.1.4",
-    "sweetalert2": "^11.7.31"
+    "sweetalert2": "^11.6.13",
+    "vercel": "^28.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -31,7 +32,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "storybook": "storybook dev -p 9009 ",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "dev": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [

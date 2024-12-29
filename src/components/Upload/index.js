@@ -8,22 +8,63 @@ import {
   Icon,
   Form,
   Divider,
-  Dropdown
+  Dropdown,
+  Grid,
+  Popup
 } from 'semantic-ui-react';
-import { CATEGORIES } from '../../constants';
+import { EXAMS } from '../../constants';
 
 const UploadJSON = () => {
   const [message, setMessage] = useState('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [category, setCategory] = useState(1);
+  const [exam, setExam] = useState(1);
   const [processing, setProcessing] = useState(false);
+
+  const [filename, setFilename] = useState('');
+  const [error, setError] = useState(null);
+
+  const handleDownload = async () => {
+    setError(null);
+
+    try {
+      // Trigger the file download
+      const response = await fetch(`/api/upload-json?filename=${exam+".json"}`);
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a temporary anchor element to download the file
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        window.URL.revokeObjectURL(url); // Clean up the URL
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to download the file');
+      }
+    } catch (error) {
+      setError('Error downloading the file');
+    }
+  };
+
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+    debugger;
     setMessage('');
     if (file && file.type === 'application/json') {
+      if(exam+".json"!=file.name){
+        setMessage('Please upload file with same filename as download filename.');
+        setFilename(file.name)
+        setSelectedFile(null);
+      }else
       setSelectedFile(file);
     } else {
       setMessage('Please upload a valid JSON file.');
@@ -32,6 +73,7 @@ const UploadJSON = () => {
   };
 
   const handleUpload = async () => {
+    debugger;
     if (!selectedFile) {
       setMessage('No file selected.');
       return;
@@ -51,7 +93,7 @@ const UploadJSON = () => {
           body: JSON.stringify({
             filename: fileName,
             content,
-            category
+            exam
           }),
         });
 
@@ -109,16 +151,50 @@ const UploadJSON = () => {
               <Form>
                 <Form.Field>
                   <p>Select Exam?</p>
-                  <Dropdown
+
+                  <Grid columns={2}>
+                  
+                  <Grid.Row>
+                    <Grid.Column  width={13}>
+                    <Dropdown
                     fluid
                     selection
-                    name="category"
+                    name="exams"
                     placeholder="Select Exam"
-                    options={CATEGORIES}
-                    value={category}
-                    onChange={(e, { value }) => setCategory(value)}
+                    options={EXAMS}
+                    value={exam}
+                    onChange={(e, { value }) => setExam(value)}
                     disabled={processing}
                   />
+                    </Grid.Column>
+                    <Grid.Column width={2}>
+                    {exam!=1 && (
+                      <Popup content='Download existing JSON file' trigger={<Button
+                              color="primary"
+                              icon="download"
+                              content={exam+".json"}
+                              onClick={handleDownload}
+                              labelPosition='left'
+                           ></Button>}/>)
+                      }
+                      
+                      
+                      {/* <Button.Content hidden>Download</Button.Content>
+                      <Button.Content visible>
+                      <Icon
+                              color="primary"
+                              name="download"
+                              labelPosition="left"
+                              
+                              onClick={handleDownload}
+                             
+                           ><span>{exam+".json"}</span></Icon>
+                      </Button.Content> */}
+                    
+                    </Grid.Column>
+                  </Grid.Row>
+                </Grid>
+                  
                   <br />
                   <label>Drag and Drop File Upload</label>
                   <Segment
