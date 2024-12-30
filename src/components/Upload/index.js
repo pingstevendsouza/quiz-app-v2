@@ -19,7 +19,7 @@ const UploadJSON = () => {
   const [uploadedFileUrl, setUploadedFileUrl] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [exam, setExam] = useState(1);
+  const [exam, setExam] = useState("CSA");
   const [processing, setProcessing] = useState(false);
 
   const [filename, setFilename] = useState('');

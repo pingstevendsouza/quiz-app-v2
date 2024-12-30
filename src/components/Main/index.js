@@ -23,7 +23,8 @@ import {
   COUNTDOWN_TIME,
   CAD_EXAM,
   CSA_EXAM,
-  SHUFFLE
+  SHUFFLE,
+  EXAMS
 } from '../../constants';
 import { shuffle } from '../../utils';
 
@@ -31,6 +32,7 @@ import Offline from '../Offline';
 
 const Main = ({ startQuiz }) => {
   const [category, setCategory] = useState(1);
+  const [exam, setExam] = useState("CSA");
   const [numOfQuestions, setNumOfQuestions] = useState(60);
   const [difficulty, setDifficulty] = useState('easy');
   const [questionsType, setQuestionsType] = useState('0');
@@ -52,7 +54,7 @@ const Main = ({ startQuiz }) => {
 
   let allFieldsSelected = false;
   if (
-    category &&
+    exam &&
     numOfQuestions &&
     doShuffle &&
     difficulty &&
@@ -67,23 +69,37 @@ const Main = ({ startQuiz }) => {
 
     if (error) setError(null);
     let data={};
-    if(category===1){
-      const response = await fetch('/exams/CSA.json');
-      debugger;
-      data = await response.json();
+    
+    const response = await fetch('/api/upload-json', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filename: `${exam}.json`, type:"json" }), // Pass the filename to fetch the JSON data
+    });
+
+    if (response.ok) {
+       data = await response.json();
     }
-    else if (category===2){
-      const response = await fetch('/exams/CAD.json');
-      data = await response.json()
-    }
-    else if (category===3){
-      const response = await fetch('/exams/ITSM.json');
-      data = await response.json()
-    }
-    else{
-      alert("Not yet implemented, please wait or try again later");
-      return;
-    }
+
+
+    // if(category===1){
+    //  /// const response = await fetch('/exams/CSA.json');
+    //   const response = await fetch(`/api/upload-json?filename=CSA.json`);
+    //   data = await response.json();
+    // }
+    // else if (category===2){
+    //   const response = await fetch('/exams/CAD.json');
+    //   data = await response.json()
+    // }
+    // else if (category===3){
+    //   const response = await fetch('/exams/ITSM.json');
+    //   data = await response.json()
+    
+    // else{
+    //   alert("Not yet implemented, please wait or try again later");
+    //   return;
+    // }
 
     setProcessing(true);
     //const API = `https://opentdb.com/api.php?amount=${numOfQuestions}&category=${category}&difficulty=${difficulty}&type=${questionsType}`;
@@ -91,7 +107,7 @@ const Main = ({ startQuiz }) => {
     // fetch(API)
     //   .then(respone => respone.json())
     //   .then(data =>
-        setTimeout(() => {
+        
           const { response_code, results } = data;
 
           if (response_code === 404) {
@@ -127,7 +143,6 @@ const Main = ({ startQuiz }) => {
             resultsMixed,
             countdownTime.hours + countdownTime.minutes + countdownTime.seconds
           );
-        }, 1000)
       // )
       // .catch(error =>
       //   setTimeout(() => {
@@ -167,12 +182,16 @@ const Main = ({ startQuiz }) => {
                 <Dropdown
                   fluid
                   selection
-                  name="category"
+                  name="exam"
                   placeholder="Select Exam"
                   header="Select Exam"
-                  options={CATEGORIES}
-                  value={category}
-                  onChange={(e, { value }) => setCategory(value)}
+                  options={EXAMS}
+                  value={exam}
+                  onChange={(e, { value }) =>{ 
+                    
+                    setExam(value)
+
+                  }}
                   disabled={processing}
                 />
                 <br />
