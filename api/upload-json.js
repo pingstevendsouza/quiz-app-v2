@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
     try {
       // Store the JSON data in Upstash Redis using the filename as the key
-      await redis.set(`${exam}-${filename}`, JSON.stringify(content));
+      await redis.set(`${filename}`, JSON.stringify(content));
       return res.status(200).json({ message: 'File uploaded successfully.' });
 
     } catch (error) {
