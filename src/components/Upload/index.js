@@ -189,7 +189,7 @@ const UploadJSON = () => {
                     </Grid.Row>
                   </Grid>
                   <br />
-                  <label>Drag and Drop File Upload</label>
+                  <label>Drag and Drop File Upload: <span color='red'>Please make sure the JSON format is same as the existing JSON file</span> </label>
                   <Segment
                     placeholder
                     onDragEnter={handleDragEnter}

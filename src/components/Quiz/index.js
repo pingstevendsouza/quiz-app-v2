@@ -39,66 +39,54 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
 
 
    
-  const checkBoxOnChange =(data, dataIndex, decodedOption)=>{
+  const checkBoxOnChange = (data, dataIndex, decodedOption) => {
+    const updatedAnswers = [...userSlectedAns];
     
-    let myAns=userSlectedAns;
-    
-    if(questionsType=="multiple"){
-    if(data.checked){
-        if(!myAns[questionIndex]) myAns[questionIndex]=[];
-        
-        myAns[questionIndex].push(decodedOption);
-     }else{
-      const index = myAns[questionIndex].indexOf(decodedOption);
-      if (index > -1) { // only splice array when item is found
-        myAns[questionIndex].splice(index, 1); // 2nd parameter means remove one item only
+    if (questionsType === "multiple") {
+      if (!updatedAnswers[questionIndex]) updatedAnswers[questionIndex] = [];
+  
+      if (data.checked) {
+        // Add the option if selected
+        updatedAnswers[questionIndex] = [...updatedAnswers[questionIndex], decodedOption];
+      } else {
+        // Remove the option if unselected
+        updatedAnswers[questionIndex] = updatedAnswers[questionIndex].filter(
+          (option) => option !== decodedOption
+        );
       }
-
-      
+    } else {
+      // Single choice question
+      updatedAnswers[questionIndex] = [decodedOption];
     }
-    
-
-
-    }else{
-      myAns[questionIndex]=[];
-      myAns[questionIndex].push(decodedOption);
-    }
-
-
-    setUserSlectedAns(myAns);
-  }
+  
+    setUserSlectedAns(updatedAnswers);
+  };
+  
 
   const handleItemClick = (e, props) => {
-    
-    let myCheck=checked;
-    let dataIndex=props.children.props.dataIndex;
-    let decodedOption=props.children.props.decodedOption;
-    if(questionsType=="multiple"){
-    if(myCheck[questionIndex]) {
-      myCheck[questionIndex][dataIndex]=!myCheck[questionIndex][dataIndex];
+    const updatedChecked = [...checked];
+    const dataIndex = props.children.props.dataIndex;
+    const decodedOption = props.children.props.decodedOption;
+  
+    if (questionsType === "multiple") {
+      if (!updatedChecked[questionIndex]) updatedChecked[questionIndex] = {};
+      updatedChecked[questionIndex][dataIndex] = !updatedChecked[questionIndex][dataIndex];
+    } else {
+      updatedChecked[questionIndex] = { [dataIndex]: true };
     }
-    else{
-      myCheck[questionIndex]={};
-      myCheck[questionIndex][dataIndex]=true;
-    }
-  }else{
-      myCheck[questionIndex]={};
-      myCheck[questionIndex][dataIndex]=true;
-  }
-
-    setChecked(myCheck);
-
-    let myData={};
-    myData["checked"]=myCheck[questionIndex][dataIndex];
-
-
+  
+    setChecked(updatedChecked);
+  
+    const myData = {
+      checked: updatedChecked[questionIndex][dataIndex],
+    };
+  
     checkBoxOnChange(myData, dataIndex, decodedOption);
-    
   };
-
+  
 
   const handleNext = () => {
-    debugger;
+
     let point = 0;
 
     if (JSON.stringify(userSlectedAns[questionIndex].sort()) === he.decode(JSON.stringify(data[questionIndex].correct_answers.sort()))) {
