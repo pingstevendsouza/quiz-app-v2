@@ -1,28 +1,33 @@
 const CATEGORIES = [
   {
     key: "CSA.json",
-    text: 'ServiceNow CSA',
+    text: 'CSA',
     value: "CSA",
   },
   {
     key: "CAD.json",
-    text: 'ServiceNow CAD',
+    text: 'CAD',
     value: "CAD",
   },
   {
     key: "ITSM.json",
-    text: 'ServiceNow CIS - ITSM',
+    text: 'CIS - ITSM',
     value: "ITSM",
   },
   {
     key: "IRM.json",
-    text: 'ServiceNow CIS - IRM',
+    text: 'CIS - IRM',
     value: "IRM",
   },
   {
     key: "VRM.json",
-    text: 'ServiceNow CIS - VRM',
+    text: 'CIS - VRM',
     value: "VRM",
+  },
+  {
+    key: "VR.json",
+    text: 'CIS - VR',
+    value: "VR",
   }
   
   // },
