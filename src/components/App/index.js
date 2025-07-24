@@ -50,7 +50,7 @@ const App = () => {
   const [authLoading, setAuthLoading] = useState(false);
 
   const handleMenuSelect = (item) => {
-    setSelectedItem(item); // Update the selected item
+    setSelectedItem(item); // Update the selected items
   };
 
   const handleAuthInput = (e) => {
