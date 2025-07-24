@@ -1556,6 +1556,7 @@ const CAD_EXAM = {
                 "type": "multiple",
                 "category": "CAD",
                 "question": "If you create a SOAP Message what syntax indicates a variable to pass when the function is called?",
+                // eslint-disable-next-line no-template-curly-in-string
                 "correct_answers": ["${variable_name}"],
                 "incorrect_answers": [
                     "current.variable_name",
