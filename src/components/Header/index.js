@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Button, Dropdown,DropdownMenu,DropdownHeader,DropdownItem,DropdownDivider,ButtonGroup } from 'semantic-ui-react';
+import { Menu, Button, Dropdown } from 'semantic-ui-react';
 
 const Header = ({ onMenuSelect }) => {
   const [promptEvent, setPromptEvent] = useState(null);
@@ -46,10 +46,6 @@ const Header = ({ onMenuSelect }) => {
         <Dropdown.Header>Exams</Dropdown.Header>
         <Dropdown.Item onClick={() => handleItemClick('Create')}>Create</Dropdown.Item>
         <Dropdown.Item onClick={() => handleItemClick('Update')}>Update</Dropdown.Item>
-        {/* <DropdownDivider />
-        <DropdownHeader>Others</DropdownHeader>
-        <DropdownItem>N/A</DropdownItem>
-        <DropdownItem>N/A</DropdownItem> */}
       </Dropdown.Menu>
     </Dropdown>
       </Menu.Item>

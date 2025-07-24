@@ -22,11 +22,8 @@ const UploadJSON = () => {
   const [exam, setExam] = useState("CSA");
   const [processing, setProcessing] = useState(false);
 
-  const [filename, setFilename] = useState('');
-  const [error, setError] = useState(null);
-
   const handleDownload = async () => {
-    setError(null);
+    setProcessing(true);
 
     try {
       // Trigger the file download
@@ -56,10 +53,12 @@ const UploadJSON = () => {
         window.URL.revokeObjectURL(url); // Clean up the URL
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Failed to download the file');
+        setMessage(errorData.error || 'Failed to download the file');
       }
     } catch (error) {
-      setError('Error downloading the file');
+      setMessage('Error downloading the file');
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -69,7 +68,7 @@ const UploadJSON = () => {
     if (file && file.type === 'application/json') {
       if (`${exam}.json` !== file.name) {
         setMessage('Please upload file with the same filename as the download filename.');
-        setFilename(file.name);
+        // setFilename(file.name); // This line was removed
         setSelectedFile(null);
       } else {
         setSelectedFile(file);

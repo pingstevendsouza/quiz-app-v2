@@ -1,41 +1,45 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Container,
-  Segment,
-  Item,
-  Dropdown,
-  Divider,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  MenuItem,
   Button,
-  Message,
-  Input,
-  Label
-} from 'semantic-ui-react';
-//import { CSA_EXAM } from '../../constants/CSA';
-
-import mindImg from '../../images/mind.svg';
+  Grid,
+  Alert,
+  Slider,
+  FormControl,
+  InputLabel,
+  Select,
+  Chip,
+  Paper,
+  FormControlLabel,
+  Switch,
+  useTheme,
+  Fade,
+  CircularProgress,
+} from '@mui/material';
+import {
+  PlayArrow,
+  Timer,
+  Shuffle,
+  Settings,
+} from '@mui/icons-material';
 
 import {
-  CATEGORIES,
-  NUM_OF_QUESTIONS,
-  DIFFICULTY,
-  QUESTIONS_TYPE,
   COUNTDOWN_TIME,
-  CAD_EXAM,
-  CSA_EXAM,
-  SHUFFLE,
   EXAMS
 } from '../../constants';
 import { shuffle } from '../../utils';
-
-import Offline from '../Offline';
+import { QuizAnimation } from '../Animations';
 
 const Main = ({ startQuiz }) => {
-  const [category, setCategory] = useState(1);
+  const theme = useTheme();
   const [exam, setExam] = useState("CSA");
   const [numOfQuestions, setNumOfQuestions] = useState(60);
-  const [difficulty, setDifficulty] = useState('easy');
-  const [questionsType, setQuestionsType] = useState('0');
   const [doShuffle, setShuffle] = useState('no');
   const [fromVal, setFromVal] = useState(1);
   const [toVal, setToVal] = useState(60);
@@ -46,9 +50,8 @@ const Main = ({ startQuiz }) => {
   });
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [offline, setOffline] = useState(false);
 
-  const handleTimeChange = (e, { name, value }) => {
+  const handleTimeChange = (name, value) => {
     setCountdownTime({ ...countdownTime, [name]: value });
   };
 
@@ -57,271 +60,303 @@ const Main = ({ startQuiz }) => {
     exam &&
     numOfQuestions &&
     doShuffle &&
-    difficulty &&
-    questionsType &&
     (countdownTime.hours || countdownTime.minutes || countdownTime.seconds)
   ) {
     allFieldsSelected = true;
   }
 
-  const fetchData =async () => {
-    
-
+  const fetchData = async () => {
     if (error) setError(null);
-    let data={};
+    let data = {};
     
-    const response = await fetch('/api/upload-json', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ filename: `${exam}.json`, type:"json" }), // Pass the filename to fetch the JSON data
-    });
-
-    if (response.ok) {
-       data = await response.json();
-    }
-
-
-    // if(category===1){
-    //  /// const response = await fetch('/exams/CSA.json');
-    //   const response = await fetch(`/api/upload-json?filename=CSA.json`);
-    //   data = await response.json();
-    // }
-    // else if (category===2){
-    //   const response = await fetch('/exams/CAD.json');
-    //   data = await response.json()
-    // }
-    // else if (category===3){
-    //   const response = await fetch('/exams/ITSM.json');
-    //   data = await response.json()
-    
-    // else{
-    //   alert("Not yet implemented, please wait or try again later");
-    //   return;
-    // }
-
     setProcessing(true);
-    //const API = `https://opentdb.com/api.php?amount=${numOfQuestions}&category=${category}&difficulty=${difficulty}&type=${questionsType}`;
+    
+    try {
+      const response = await fetch('/api/upload-json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filename: `${exam}.json`, type: "json" }),
+      });
 
-    // fetch(API)
-    //   .then(respone => respone.json())
-    //   .then(data =>
-        
-          const { response_code, results } = data;
+      if (response.ok) {
+        data = await response.json();
+      } else {
+        throw new Error('Failed to fetch quiz data');
+      }
 
-          if (response_code === 404) {
-            const message = (
-              <p>
-                The API doesn't have enough questions for your query. (Ex.
-                Asking for 50 Questions in a Category that only has 20.)
-                <br />
-                <br />
-                Please change the <strong>No. of Questions</strong>,{' '}
-                <strong>Difficulty Level</strong>, or{' '}
-                <strong>Type of Questions</strong>.
-              </p>
-            );
+      const { response_code, results } = data;
 
-            setProcessing(false);
-            setError({ message });
+      if (response_code === 404) {
+        const message = 'The selected exam does not have enough questions. Please try another exam.';
+        setProcessing(false);
+        setError(message);
+        return;
+      }
 
-            return;
-          }
+      results.forEach(element => {
+        const options = [...new Set([...element.correct_answers, ...element.incorrect_answers])];
+        element.options = shuffle(options);
+      });
+      
+      let resultsMixed = doShuffle === "yes" ? shuffle(results) : results.slice(fromVal - 1, toVal);
+      resultsMixed.length = doShuffle === "yes" ? numOfQuestions : resultsMixed.length;
 
-          
-          results.forEach(element => {
-            const options=[...new Set([...element.correct_answers ,...element.incorrect_answers])];
-            element.options = shuffle(options);
-          });
-          
-          let resultsMixed=doShuffle=="yes"?shuffle(results):results.slice(fromVal-1,toVal);
-          resultsMixed.length=doShuffle=="yes"?numOfQuestions:resultsMixed.length;
-
-          setProcessing(false);
-          startQuiz(
-            resultsMixed,
-            countdownTime.hours + countdownTime.minutes + countdownTime.seconds
-          );
-      // )
-      // .catch(error =>
-      //   setTimeout(() => {
-      //     if (!navigator.onLine) {
-      //       setOffline(true);
-      //     } else {
-      //       setProcessing(false);
-      //       setError(error);
-      //     }
-      //   }, 1000)
-      // );
+      setProcessing(false);
+      startQuiz(
+        resultsMixed,
+        countdownTime.hours + countdownTime.minutes + countdownTime.seconds
+      );
+    } catch (error) {
+      setProcessing(false);
+      setError(error.message || 'An error occurred while loading the quiz.');
+    }
   };
 
-  const preventNegativeValues = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault()
-
-  if (offline) return <Offline />;
+  const getTotalTime = () => {
+    const totalSeconds = countdownTime.hours + countdownTime.minutes + countdownTime.seconds;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
 
   return (
-    <Container>
-      <Segment>
-        <Item.Group divided>
-          <Item>
-            <Item.Image src={mindImg} />
-            <Item.Content>
-              <Item.Header>
-                <h1>The ServiceNow Quiz</h1>
-              </Item.Header>
-              {error && (
-                <Message error onDismiss={() => setError(null)}>
-                  <Message.Header>Error!</Message.Header>
-                  {error.message}
-                </Message>
-              )}
-              <Divider />
-              <Item.Meta>
-                <p>Select Exam?</p>
-                <Dropdown
-                  fluid
-                  selection
-                  name="exam"
-                  placeholder="Select Exam"
-                  header="Select Exam"
-                  options={EXAMS}
-                  value={exam}
-                  onChange={(e, { value }) =>{ 
-                    
-                    setExam(value)
+    <Fade in timeout={500}>
+      <Box sx={{ maxWidth: 900, mx: 'auto' }}>
+        <Card
+          sx={{
+            boxShadow: theme.shadows[8],
+            borderRadius: 3,
+            overflow: 'visible',
+            position: 'relative',
+          }}
+        >
+          <Box
+            sx={{
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+              color: 'white',
+              p: 4,
+              textAlign: 'center',
+            }}
+          >
+            <Box sx={{ maxWidth: 300, mx: 'auto', mb: 2 }}>
+              <QuizAnimation size={200} />
+            </Box>
+            <Typography variant="h4" fontWeight={700} gutterBottom sx={{ color: 'white' }}>
+              Configure Your Quiz
+            </Typography>
+            <Typography variant="body1" sx={{ opacity: 0.9, color: 'white', fontSize: '1.1rem' }}>
+              Customize your quiz settings and start practicing
+            </Typography>
+          </Box>
 
-                  }}
-                  disabled={processing}
-                />
-                <br />
-                <p>Shuffle?</p>
-                <Dropdown
-                  search
-                  selection
-                  name="doShuffle"
-                  placeholder="Select Shuffle"
-                  header="Select Shuffle"
-                  options={SHUFFLE}
-                  value={doShuffle}
-                  onChange={(e, { value }) => setShuffle(value)}
-                  disabled={processing}
-                />
-                {
-                doShuffle=="no"?
-                (<><Input
-                      value={fromVal}
-                      onChange={(e, { value }) => setFromVal(value)}
-                      label="From Question #"
-                      labelPosition='left' type='number' placeholder='From Question #' 
-                      min="0"
-                      onKeyDown={preventNegativeValues}>
-                      
-                    </Input><Input
-                      value={toVal}
-                      onChange={(e, { value }) => setToVal(value)}
-                      label="To Question #"
-                      placeholder='To Question #'
-                      labelPosition='left'
-                      type='number'
-                      min="0"
-                        onKeyDown={preventNegativeValues} /></>):(
-                          <><br/><br/><p>How many questions do you want in your quiz? (Mainline - 60)</p>
-                <Dropdown
-                  search
-                  selection
-                  name="numOfQ"
-                  placeholder="Select No. of Questions"
-                  header="Select No. of Questions"
-                  options={NUM_OF_QUESTIONS}
-                  value={numOfQuestions}
-                  onChange={(e, { value }) => setNumOfQuestions(value)}
-                  disabled={processing}
-                />
-               </>
-                        )
-                }
-                <br />
-                <br />
-                {/* {/* <p>How difficult do you want your quiz to be?</p>
-                <Dropdown
-                  fluid
-                  selection
-                  name="difficulty"
-                  placeholder="Select Difficulty Level"
-                  header="Select Difficulty Level"
-                  options={DIFFICULTY}
-                  value={difficulty}
-                  onChange={(e, { value }) => setDifficulty(value)}
-                  disabled={processing}
-                />
-                <br /> */}
-                {/* <p>Which type of questions do you want in your quiz?</p>
-                <Dropdown
-                  fluid
-                  selection
-                  name="type"
-                  placeholder="Select Questions Type"
-                  header="Select Questions Type"
-                  options={QUESTIONS_TYPE}
-                  value={questionsType}
-                  onChange={(e, { value }) => setQuestionsType(value)}
-                  disabled={processing}
-                />
-                <br />  */}
-                <p>Please select the countdown time for your quiz. (Mainline - 90)</p>
-                <Dropdown
-                  search
-                  selection
-                  name="hours"
-                  placeholder="Select Hours"
-                  header="Select Hours"
-                  options={COUNTDOWN_TIME.hours}
-                  value={countdownTime.hours}
-                  onChange={handleTimeChange}
-                  disabled={processing}
-                />
-                <Dropdown
-                  search
-                  selection
-                  name="minutes"
-                  placeholder="Select Minutes"
-                  header="Select Minutes"
-                  options={COUNTDOWN_TIME.minutes}
-                  value={countdownTime.minutes}
-                  onChange={handleTimeChange}
-                  disabled={processing}
-                />
-                <Dropdown
-                  search
-                  selection
-                  name="seconds"
-                  placeholder="Select Seconds"
-                  header="Select Seconds"
-                  options={COUNTDOWN_TIME.seconds}
-                  value={countdownTime.seconds}
-                  onChange={handleTimeChange}
-                  disabled={processing}
-                />
-              </Item.Meta>
-              <Divider />
-              <Item.Extra>
+          <CardContent sx={{ p: 4 }}>
+            {error && (
+              <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Grid container spacing={3}>
+              {/* Exam Selection */}
+              <Grid item xs={12}>
+                <Paper elevation={1} sx={{ p: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.9)' }}>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.text.primary }}>
+                    <Settings color="primary" />
+                    Exam Selection
+                  </Typography>
+                  <FormControl fullWidth sx={{ mt: 2 }}>
+                    <InputLabel>Select Exam</InputLabel>
+                    <Select
+                      value={exam}
+                      label="Select Exam"
+                      onChange={(e) => setExam(e.target.value)}
+                      disabled={processing}
+                    >
+                      {EXAMS.map((examOption) => (
+                        <MenuItem key={examOption.value} value={examOption.value}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {examOption.text}
+                            {examOption.value === 'CSA' && (
+                              <Chip label="Popular" size="small" color="primary" />
+                            )}
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Paper>
+              </Grid>
+
+              {/* Shuffle Settings */}
+              <Grid item xs={12}>
+                <Paper elevation={1} sx={{ p: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.9)' }}>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.text.primary }}>
+                    <Shuffle color="primary" />
+                    Question Settings
+                  </Typography>
+                  
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={doShuffle === 'yes'}
+                        onChange={(e) => setShuffle(e.target.checked ? 'yes' : 'no')}
+                        disabled={processing}
+                      />
+                    }
+                    label="Shuffle Questions"
+                    sx={{ mt: 2, mb: 2 }}
+                  />
+
+                  {doShuffle === 'no' ? (
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="From Question #"
+                          type="number"
+                          value={fromVal}
+                          onChange={(e) => setFromVal(parseInt(e.target.value) || 1)}
+                          InputProps={{ inputProps: { min: 1 } }}
+                          disabled={processing}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="To Question #"
+                          type="number"
+                          value={toVal}
+                          onChange={(e) => setToVal(parseInt(e.target.value) || 60)}
+                          InputProps={{ inputProps: { min: 1 } }}
+                          disabled={processing}
+                        />
+                      </Grid>
+                    </Grid>
+                  ) : (
+                    <Box sx={{ mt: 3 }}>
+                      <Typography gutterBottom sx={{ color: theme.palette.text.primary }}>
+                        Number of Questions: <strong>{numOfQuestions}</strong>
+                      </Typography>
+                      <Slider
+                        value={numOfQuestions}
+                        onChange={(e, value) => setNumOfQuestions(value)}
+                        min={10}
+                        max={100}
+                        step={10}
+                        marks
+                        valueLabelDisplay="auto"
+                        disabled={processing}
+                      />
+                    </Box>
+                  )}
+                </Paper>
+              </Grid>
+
+              {/* Timer Settings */}
+              <Grid item xs={12}>
+                <Paper elevation={1} sx={{ p: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.9)' }}>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.text.primary }}>
+                    <Timer color="primary" />
+                    Timer Settings
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Total Time: <strong>{getTotalTime()}</strong>
+                  </Typography>
+                  
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4}>
+                      <FormControl fullWidth>
+                        <InputLabel>Hours</InputLabel>
+                        <Select
+                          value={countdownTime.hours}
+                          label="Hours"
+                          onChange={(e) => handleTimeChange('hours', e.target.value)}
+                          disabled={processing}
+                        >
+                          {COUNTDOWN_TIME.hours.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.text}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <FormControl fullWidth>
+                        <InputLabel>Minutes</InputLabel>
+                        <Select
+                          value={countdownTime.minutes}
+                          label="Minutes"
+                          onChange={(e) => handleTimeChange('minutes', e.target.value)}
+                          disabled={processing}
+                        >
+                          {COUNTDOWN_TIME.minutes.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.text}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <FormControl fullWidth>
+                        <InputLabel>Seconds</InputLabel>
+                        <Select
+                          value={countdownTime.seconds}
+                          label="Seconds"
+                          onChange={(e) => handleTimeChange('seconds', e.target.value)}
+                          disabled={processing}
+                        >
+                          {COUNTDOWN_TIME.seconds.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.text}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+
+              {/* Start Button */}
+              <Grid item xs={12}>
                 <Button
-                  primary
-                  size="big"
-                  icon="play"
-                  labelPosition="left"
-                  content={processing ? 'Processing...' : 'Start Now'}
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  startIcon={processing ? <CircularProgress size={20} color="inherit" /> : <PlayArrow />}
                   onClick={fetchData}
                   disabled={!allFieldsSelected || processing}
-                />
-              </Item.Extra>
-            </Item.Content>
-          </Item>
-        </Item.Group>
-      </Segment>
-      <br />
-    </Container>
+                  sx={{
+                    py: 2,
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    background: allFieldsSelected && !processing
+                      ? `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.dark} 90%)`
+                      : undefined,
+                    boxShadow: allFieldsSelected && !processing
+                      ? '0 3px 15px 2px rgba(94, 114, 228, .3)'
+                      : undefined,
+                    '&:hover': {
+                      transform: allFieldsSelected && !processing ? 'translateY(-2px)' : undefined,
+                      boxShadow: allFieldsSelected && !processing
+                        ? '0 6px 20px 2px rgba(94, 114, 228, .3)'
+                        : undefined,
+                    },
+                    transition: 'all 0.3s ease',
+                  }}
+                >
+                  {processing ? 'Loading Quiz...' : 'Start Quiz'}
+                </Button>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Box>
+    </Fade>
   );
 };
 

@@ -1,139 +1,99 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Container,
-  Segment,
-  Item,
-  Divider,
+  Box,
   Button,
-  Icon,
-  Message,
-  Menu,
-  Header,
-  Pagination,
-  Checkbox
-} from 'semantic-ui-react';
+  Card,
+  CardContent,
+  Container,
+  Typography,
+  Divider,
+  useTheme,
+  Fade,
+  Slide,
+} from '@mui/material';
+import {
+  ArrowBack,
+  ArrowForward,
+  CheckCircle,
+} from '@mui/icons-material';
 import he from 'he';
 
-
+import QuizQuestion from './QuizQuestion';
 import Countdown from '../Countdown';
-import { getLetter } from '../../utils';
 
 const Quiz = ({ data, countdownTime, endQuiz }) => {
+  const theme = useTheme();
   const [questionIndex, setQuestionIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
-  const [userSlectedAns, setUserSlectedAns] = useState([]);
-  const [checked, setChecked] = useState([]);
-  const [activePage, setActivePage] = useState(1);
+  const [userSelectedAns, setUserSelectedAns] = useState([]);
   const [questionsAndAnswers, setQuestionsAndAnswers] = useState([]);
   const [timeTaken, setTimeTaken] = useState(null);
-  const [questionsType, setQuestionsType] = useState(data[questionIndex].correct_answers.length>1?"multiple":"single");
-  
+  const [isMultipleChoice, setIsMultipleChoice] = useState(data[questionIndex].correct_answers.length > 1);
 
   useEffect(() => {
     if (questionIndex > 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsMultipleChoice(data[questionIndex].correct_answers.length > 1);
+  }, [questionIndex, data]);
 
-    setQuestionsType(data[questionIndex].correct_answers.length>1?"multiple":"single");
-    
-  }, [questionIndex]);
-
-
-   
-  const checkBoxOnChange = (data, dataIndex, decodedOption) => {
-    const updatedAnswers = [...userSlectedAns];
-    
-    if (questionsType === "multiple") {
-      if (!updatedAnswers[questionIndex]) updatedAnswers[questionIndex] = [];
-  
-      if (data.checked) {
-        // Add the option if selected
-        updatedAnswers[questionIndex] = [...updatedAnswers[questionIndex], decodedOption];
-      } else {
-        // Remove the option if unselected
-        updatedAnswers[questionIndex] = updatedAnswers[questionIndex].filter(
-          (option) => option !== decodedOption
-        );
-      }
-    } else {
-      // Single choice question
-      updatedAnswers[questionIndex] = [decodedOption];
-    }
-  
-    setUserSlectedAns(updatedAnswers);
+  const handleAnswerSelect = (selectedOptions) => {
+    const updatedAnswers = [...userSelectedAns];
+    updatedAnswers[questionIndex] = selectedOptions;
+    setUserSelectedAns(updatedAnswers);
   };
-  
-
-  const handleItemClick = (e, props) => {
-    const updatedChecked = [...checked];
-    const dataIndex = props.children.props.dataIndex;
-    const decodedOption = props.children.props.decodedOption;
-  
-    if (questionsType === "multiple") {
-      if (!updatedChecked[questionIndex]) updatedChecked[questionIndex] = {};
-      updatedChecked[questionIndex][dataIndex] = !updatedChecked[questionIndex][dataIndex];
-    } else {
-      updatedChecked[questionIndex] = { [dataIndex]: true };
-    }
-  
-    setChecked(updatedChecked);
-  
-    const myData = {
-      checked: updatedChecked[questionIndex][dataIndex],
-    };
-  
-    checkBoxOnChange(myData, dataIndex, decodedOption);
-  };
-  
 
   const handleNext = () => {
-
     let point = 0;
-
-    if (JSON.stringify(userSlectedAns[questionIndex].sort()) === he.decode(JSON.stringify(data[questionIndex].correct_answers.sort()))) {
-      point = 1;
+    if (userSelectedAns[questionIndex]) {
+      if (isMultipleChoice) {
+        const userAnswers = userSelectedAns[questionIndex] || [];
+        const correctAnswers = data[questionIndex].correct_answers;
+        
+        const userSet = new Set(userAnswers);
+        const correctSet = new Set(correctAnswers);
+        
+        if (userSet.size === correctSet.size && 
+            [...userSet].every(answer => correctSet.has(answer))) {
+          point = 1;
+        }
+      } else {
+        if (userSelectedAns[questionIndex][0] === data[questionIndex].correct_answers[0]) {
+          point = 1;
+        }
+      }
     }
 
-    const qna = questionsAndAnswers;
-    qna.push({
+    const qna = {
       question: he.decode(data[questionIndex].question),
-      user_answer: userSlectedAns[questionIndex],
-      correct_answer: data[questionIndex].correct_answers.map((i)=>{return he.decode(i); }),
+      user_answer: userSelectedAns[questionIndex] ? 
+        (Array.isArray(userSelectedAns[questionIndex]) ? 
+          userSelectedAns[questionIndex].join(', ') : 
+          userSelectedAns[questionIndex]) : 
+        'Not Answered',
+      correct_answer: data[questionIndex].correct_answers.join(', '),
       point,
-    });
+    };
+
+    setQuestionsAndAnswers([...questionsAndAnswers, qna]);
+    setCorrectAnswers(correctAnswers + point);
 
     if (questionIndex === data.length - 1) {
-      return endQuiz({
+      endQuiz({
         totalQuestions: data.length,
         correctAnswers: correctAnswers + point,
         timeTaken,
-        questionsAndAnswers: qna,
+        questionsAndAnswers: [...questionsAndAnswers, qna],
       });
+    } else {
+      setQuestionIndex(questionIndex + 1);
     }
-
-    setCorrectAnswers(correctAnswers + point);
-    setQuestionIndex(questionIndex + 1);
- //   setUserSlectedAns(null);
-    setQuestionsAndAnswers(qna);
   };
 
   const handlePrev = () => {
-    debugger;
-    let point = 0;
-
-    if (userSlectedAns && userSlectedAns[questionIndex-1] && JSON.stringify(userSlectedAns[questionIndex-1].sort()) === he.decode(JSON.stringify(data[questionIndex-1].correct_answers.sort()))) {
-      point = 1;
+    if (questionIndex > 0) {
+      setQuestionIndex(questionIndex - 1);
     }
-    setCorrectAnswers(correctAnswers - point);
-    const qna = questionsAndAnswers;
-    qna.pop();
-    setQuestionsAndAnswers(qna);
-    setQuestionIndex(questionIndex - 1);
-    
-  }
-
-  const handlePaginationChange =(e, { activePage })=>{
-    setQuestionIndex(activePage - 1);
-  }
+  };
 
   const timeOver = timeTaken => {
     return endQuiz({
@@ -144,116 +104,126 @@ const Quiz = ({ data, countdownTime, endQuiz }) => {
     });
   };
 
-  return (
-    <Item.Header>
-      <Container>
-        <Segment>
-          <Item.Group divided>
-            <Item>
-              <Item.Content>
-                <Item.Extra>
-                  <Header as="h1" block floated="left">
-                    <Icon name="info circle" />
-                    <Header.Content>
-                      {`Question No.${questionIndex + 1} of ${data.length}`}
-                    </Header.Content>
-                  </Header>
-                  <Countdown
-                    countdownTime={countdownTime}
-                    timeOver={timeOver}
-                    setTimeTaken={setTimeTaken}
-                  />
-                </Item.Extra>
-                <br />
-                <Item.Meta>
-                  <Message size="huge" floating>
-                    <b>{`Q. ${he.decode(data[questionIndex].question)}`}</b>
-                  </Message>
-                  <br />
-                  <Item.Description>
-                    <h3>Please choose of the following answers:</h3>
-                  </Item.Description>
-                  <Divider />
-                  <Menu vertical fluid size="massive">
-                    {data[questionIndex].options.map((option, i) => {
-                      const letter = getLetter(i);
-                      const decodedOption = he.decode(option);
-                      return (
-                        <Menu.Item
-                          key={decodedOption}
-                          name={decodedOption}
-                          active={checked[questionIndex] && checked[questionIndex][i]}
-                          onClick={handleItemClick}
-                        >
-                          <Checkbox 
-                          radio={data[questionIndex].correct_answers.length>1?false:true}
-                          name={data[questionIndex].correct_answers.length>1?"question"+questionIndex+i:"question"+questionIndex}
-                          label={<label><b style={{ marginRight: '8px', marginLeft: '8px' }}>{letter}</b>
-                          {decodedOption}</label>}
-                            onChange={(e, data) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              let myCheck=checked;
-                              if(questionsType=="multiple"){
-                              if(!myCheck[questionIndex]) myCheck[questionIndex]={};
-                              myCheck[questionIndex][i]=data.checked;
-                              }else{
-                                myCheck[questionIndex]={};
-                                myCheck[questionIndex][i]=data.checked;
-                              }
-                              setChecked(myCheck); 
-                              checkBoxOnChange(data,i,decodedOption);
+  // Decode options
+  const currentQuestion = {
+    ...data[questionIndex],
+    question: he.decode(data[questionIndex].question),
+    options: data[questionIndex].options.map(option => he.decode(option))
+  };
 
-                            }}
-                            checked={(checked[questionIndex] && checked[questionIndex][i])?true:false}
-                            dataIndex={i}
-                            option={letter}
-                            decodedOption={decodedOption}
-                          />
-                          
-                          
-                        </Menu.Item>
-                      );
-                    })}
-                  </Menu>
-                </Item.Meta>
-                <Divider />
-                <Item.Extra>
-                {questionIndex>=1?<><Button
-                    primary
-                    content="Previous"
-                    onClick={handlePrev}
-                    floated="left"
-                    size="big"
-                    icon="left chevron"
-                    labelPosition="left"
-                  />
-                  {/* <Pagination
-                  activePage={activePage}
-                  onPageChange={handlePaginationChange}
-                  totalPages={data.length}npm
-                /> */}
-                </>:<></>}
-                  
-                  <Button
-                    color={questionIndex === data.length -1?"green":"primary"}                   
-                    content={questionIndex === data.length - 1?"Submit":"Next"}
-                    onClick={handleNext}
-                    floated="right"
-                    size="big"
-                    icon={questionIndex === data.length -1?"check circle outline":"right chevron"}
-                    labelPosition="right"
-                    disabled={!userSlectedAns[questionIndex]?.length}
-                  />
-                  
-                </Item.Extra>
-              </Item.Content>
-            </Item>
-          </Item.Group>
-        </Segment>
-        <br />
-      </Container>
-    </Item.Header>
+  return (
+    <Container maxWidth="lg" sx={{ py: 3 }}>
+      <Fade in timeout={500}>
+        <Box>
+          <Card sx={{ 
+            mb: 3, 
+            borderRadius: 2,
+            boxShadow: theme.shadows[3],
+            overflow: 'visible',
+          }}>
+            <CardContent sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2,
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="h6" fontWeight={600} color="primary">
+                  Question {questionIndex + 1} of {data.length}
+                </Typography>
+                {isMultipleChoice && (
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      backgroundColor: theme.palette.info.light,
+                      color: theme.palette.info.dark,
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1,
+                      fontWeight: 500,
+                    }}
+                  >
+                    Multiple Choice
+                  </Typography>
+                )}
+              </Box>
+              <Countdown
+                countdownTime={countdownTime}
+                timeOver={timeOver}
+                setTimeTaken={setTimeTaken}
+              />
+            </CardContent>
+          </Card>
+
+          <Slide direction="up" in timeout={300}>
+            <Box>
+              <QuizQuestion
+                question={currentQuestion}
+                questionIndex={questionIndex}
+                totalQuestions={data.length}
+                selectedAnswers={userSelectedAns[questionIndex]}
+                onAnswerSelect={handleAnswerSelect}
+                isMultipleChoice={isMultipleChoice}
+              />
+            </Box>
+          </Slide>
+
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between',
+              mt: 3,
+            }}
+          >
+            {questionIndex >= 1 ? (
+              <Button
+                variant="outlined"
+                startIcon={<ArrowBack />}
+                onClick={handlePrev}
+                size="large"
+                sx={{ 
+                  px: 4,
+                  py: 1.5,
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                  },
+                }}
+              >
+                Previous
+              </Button>
+            ) : (
+              <Box /> // Empty box for spacing
+            )}
+            
+            <Button
+              variant="contained"
+              endIcon={questionIndex === data.length - 1 ? <CheckCircle /> : <ArrowForward />}
+              onClick={handleNext}
+              size="large"
+              color={questionIndex === data.length - 1 ? "success" : "primary"}
+              disabled={!userSelectedAns[questionIndex]?.length}
+              sx={{
+                px: 4,
+                py: 1.5,
+                background: questionIndex === data.length - 1
+                  ? `linear-gradient(45deg, ${theme.palette.success.main} 30%, ${theme.palette.success.dark} 90%)`
+                  : `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.dark} 90%)`,
+                boxShadow: '0 3px 15px 2px rgba(0, 0, 0, 0.15)',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px 2px rgba(0, 0, 0, 0.15)',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {questionIndex === data.length - 1 ? "Submit" : "Next"}
+            </Button>
+          </Box>
+        </Box>
+      </Fade>
+    </Container>
   );
 };
 
