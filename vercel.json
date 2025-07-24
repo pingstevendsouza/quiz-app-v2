@@ -1,19 +1,18 @@
 {
-  "routes": [
+  "version": 2,
+  "builds": [
     {
-      "src": "/api/auth/google",
-      "methods": ["POST", "OPTIONS"],
-      "dest": "/api/auth/google"
-    },
-    {
-      "src": "/api/upload-json",
-      "methods": ["POST", "OPTIONS"],
-      "dest": "/api/upload-json"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
     }
+  ],
+  "rewrites": [
+    { "source": "/api/auth/google", "destination": "/api/auth/google" },
+    { "source": "/api/upload-json", "destination": "/api/upload-json" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
