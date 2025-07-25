@@ -1,8 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Button, TextField, Typography, Paper, CircularProgress, Divider } from '@mui/material';
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
+  Paper, 
+  CircularProgress, 
+  Divider,
+  InputAdornment,
+  IconButton,
+  Alert
+} from '@mui/material';
+import { 
+  Visibility, 
+  VisibilityOff, 
+  Email, 
+  Lock,
+  Google as GoogleIcon
+} from '@mui/icons-material';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-import jwt_decode from 'jwt-decode';
 
 const GOOGLE_CLIENT_ID = '651363949873-8b853017h823jadb3mk0ckcrua8fu9bn.apps.googleusercontent.com';
 
@@ -10,6 +27,7 @@ const SignIn = ({ setAuth }) => {
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -69,64 +87,248 @@ const SignIn = ({ setAuth }) => {
     setLoading(false);
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Paper elevation={6} sx={{ p: 4, maxWidth: 400, width: '100%', bgcolor: '#181A20', color: '#fff', borderRadius: 4 }}>
-        <Typography variant="h4" fontWeight={700} mb={2} align="center" color="#fff">
-          Sign In
-        </Typography>
+    <Box 
+      sx={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        padding: 2
+      }}
+    >
+      <Paper 
+        elevation={24} 
+        sx={{ 
+          p: 6, 
+          maxWidth: 450, 
+          width: '100%', 
+          bgcolor: '#ffffff', 
+          borderRadius: 4,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+        }}
+      >
+        {/* Header */}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography 
+            variant="h3" 
+            fontWeight={700} 
+            sx={{ 
+              color: '#2D3748',
+              mb: 1,
+              fontSize: { xs: '2rem', sm: '2.5rem' }
+            }}
+          >
+            Welcome Back
+          </Typography>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              color: '#718096',
+              fontSize: '1.1rem'
+            }}
+          >
+            Sign in to your account
+          </Typography>
+        </Box>
+
+        {/* Google Login */}
         <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ mb: 3 }}>
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => setError('Google sign in failed')}
-              theme="filled_black"
-              width="320"
+              theme="outline"
+              size="large"
+              width="100%"
+              text="continue_with"
+              shape="rectangular"
             />
           </Box>
         </GoogleOAuthProvider>
-        <Divider sx={{ my: 2, bgcolor: '#353945' }}>or</Divider>
+
+        {/* Divider */}
+        <Divider sx={{ my: 3 }}>
+          <Typography variant="body2" color="#A0AEC0">
+            or
+          </Typography>
+        </Divider>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Login Form */}
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Username"
+            label="Email or Username"
             name="username"
             value={form.username}
             onChange={handleChange}
             fullWidth
             margin="normal"
             autoFocus
-            InputProps={{ style: { color: '#fff' } }}
-            InputLabelProps={{ style: { color: '#aaa' } }}
-            sx={{ input: { bgcolor: '#23262F' } }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Email sx={{ color: '#A0AEC0' }} />
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: 2,
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#E2E8F0',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#CBD5E0',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                }
+              }
+            }}
+            InputLabelProps={{ 
+              sx: { color: '#A0AEC0' } 
+            }}
+            sx={{
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              }
+            }}
           />
+          
           <TextField
             label="Password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={form.password}
             onChange={handleChange}
             fullWidth
             margin="normal"
-            InputProps={{ style: { color: '#fff' } }}
-            InputLabelProps={{ style: { color: '#aaa' } }}
-            sx={{ input: { bgcolor: '#23262F' } }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock sx={{ color: '#A0AEC0' }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                    sx={{ color: '#A0AEC0' }}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: 2,
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: '#E2E8F0',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#CBD5E0',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                }
+              }
+            }}
+            InputLabelProps={{ 
+              sx: { color: '#A0AEC0' } 
+            }}
+            sx={{
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              }
+            }}
           />
-          {error && <Typography color="error" mt={1}>{error}</Typography>}
+
+          {/* Forgot Password */}
+          <Box sx={{ textAlign: 'right', mb: 3 }}>
+            <Link 
+              to="/forgot-password" 
+              style={{ 
+                color: '#667eea', 
+                textDecoration: 'none', 
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}
+            >
+              Forgot password?
+            </Link>
+          </Box>
+
+          {/* Sign In Button */}
           <Button
             type="submit"
             variant="contained"
-            color="primary"
             fullWidth
-            sx={{ mt: 2, py: 1.5, fontWeight: 600, fontSize: '1rem', borderRadius: 2, bgcolor: '#23262F', color: '#fff', '&:hover': { bgcolor: '#353945' } }}
             disabled={loading || !form.username || !form.password}
-            startIcon={loading && <CircularProgress size={20} color="inherit" />}
+            sx={{
+              py: 1.5,
+              fontWeight: 600,
+              fontSize: '1rem',
+              borderRadius: 2,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              textTransform: 'none',
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
+              },
+              '&:disabled': {
+                background: '#E2E8F0',
+                color: '#A0AEC0'
+              }
+            }}
           >
-            {loading ? 'Signing In...' : 'Sign In'}
+            {loading ? (
+              <>
+                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                Signing In...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </Button>
         </form>
-        <Typography align="center" mt={3} color="#aaa">
+
+        {/* Sign Up Link */}
+        <Typography 
+          align="center" 
+          sx={{ 
+            mt: 4, 
+            color: '#718096',
+            fontSize: '1rem'
+          }}
+        >
           Don't have an account?{' '}
-          <Link to="/signup" style={{ color: '#5e72e4', textDecoration: 'none', fontWeight: 600 }}>Sign Up</Link>
+          <Link 
+            to="/signup" 
+            style={{ 
+              color: '#667eea', 
+              textDecoration: 'none', 
+              fontWeight: 600 
+            }}
+          >
+            Sign Up
+          </Link>
         </Typography>
       </Paper>
     </Box>

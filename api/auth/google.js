@@ -1,8 +1,9 @@
-import { Redis } from '@upstash/redis';
-import { OAuth2Client } from 'google-auth-library';
+const { Redis } = require('@upstash/redis');
+const { OAuth2Client } = require('google-auth-library');
+const crypto = require('crypto');
 
 // Enable CORS for all methods
-export const config = {
+const config = {
   api: {
     bodyParser: true,
   },
@@ -66,7 +67,7 @@ async function handler(req, res) {
       }));
 
       // Create session
-      const sessionToken = require('crypto').randomBytes(32).toString('hex');
+      const sessionToken = crypto.randomBytes(32).toString('hex');
       const sessionKey = `session:${sessionToken}`;
       await redis.set(sessionKey, JSON.stringify({ 
         username,
@@ -97,4 +98,5 @@ async function handler(req, res) {
 }
 
 // Export the handler with CORS support
-export default allowCors(handler);
+module.exports = allowCors(handler);
+module.exports.config = config;
