@@ -73,18 +73,25 @@ const SignIn = ({ setAuth }) => {
       if (!res.ok) {
         setError(data.error || 'Google sign in failed');
       } else {
+        // Store the session token and user data
         localStorage.setItem('sessionToken', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Update the auth state with the user data
         setAuth({ 
           token: data.token, 
           user: data.user 
         });
+        
+        // Redirect to home
         navigate('/');
       }
     } catch (e) {
-      setError('Google sign in failed');
+      console.error('Google sign in error:', e);
+      setError('Google sign in failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const togglePasswordVisibility = () => {

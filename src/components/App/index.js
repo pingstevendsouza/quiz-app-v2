@@ -30,8 +30,18 @@ import {
 
 const getSession = () => {
   const token = localStorage.getItem('sessionToken');
-  const username = localStorage.getItem('username');
-  return token && username ? { token, username } : null;
+  const userData = localStorage.getItem('user');
+  try {
+    if (token && userData) {
+      const user = JSON.parse(userData);
+      return { token, user };
+    }
+  } catch (e) {
+    console.error('Error parsing user data:', e);
+    localStorage.removeItem('user');
+    localStorage.removeItem('sessionToken');
+  }
+  return null;
 };
 
 const App = () => {
@@ -48,6 +58,23 @@ const App = () => {
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check for session on initial load and route changes
+  React.useEffect(() => {
+    const currentSession = getSession();
+    if (currentSession) {
+      setAuth(currentSession);
+      // If we're on auth pages but already logged in, redirect to home
+      if (location.pathname === '/signin' || location.pathname === '/signup') {
+        navigate('/');
+      }
+    } else if (location.pathname !== '/signup') {
+      // If not logged in and not on signup page, redirect to signin
+      navigate('/signin');
+    }
+  }, [location.pathname, navigate]);
 
   const handleMenuSelect = (item) => {
     setSelectedItem(item); // Update the selected items
@@ -79,8 +106,12 @@ const App = () => {
       } else {
         if (type === 'signin') {
           localStorage.setItem('sessionToken', data.token);
-          localStorage.setItem('username', data.username);
-          setAuth({ token: data.token, username: data.username });
+          localStorage.setItem('user', JSON.stringify(data.user || { username: data.username }));
+          setAuth({ 
+            token: data.token, 
+            user: data.user || { username: data.username }
+          });
+          navigate('/');
         } else {
           setAuthTab(0);
           setAuthError('Sign up successful! Please sign in.');
@@ -95,8 +126,9 @@ const App = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('sessionToken');
-    localStorage.removeItem('username');
+    localStorage.removeItem('user');
     setAuth(null);
+    navigate('/signin');
   };
 
   const startQuiz = (data, countdownTime) => {
@@ -168,20 +200,7 @@ const App = () => {
     }, 1000);
   };
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Remove modal logic
-
-  // If not authenticated, redirect to /signin unless already there
-  React.useEffect(() => {
-    if (!auth && location.pathname !== '/signin' && location.pathname !== '/signup') {
-      navigate('/signin', { replace: true });
-    }
-    if (auth && (location.pathname === '/signin' || location.pathname === '/signup')) {
-      navigate('/', { replace: true });
-    }
-  }, [auth, location.pathname, navigate]);
+  // Remove duplicate navigation logic
 
   return (
     <ThemeProvider theme={theme}>
@@ -194,9 +213,22 @@ const App = () => {
           element={
             auth ? (
               <DashboardLayout onMenuSelect={handleMenuSelect} selectedItem={selectedItem}>
-                <Box sx={{ position: 'absolute', top: 16, right: 24, zIndex: 1201 }}>
+                <Box sx={{ position: 'absolute', top: 16, right: 24, zIndex: 1201, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {auth.user?.picture && (
+                    <img 
+                      src={auth.user.picture} 
+                      alt="Profile" 
+                      style={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '50%',
+                        border: '2px solid #fff',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }} 
+                    />
+                  )}
                   <Button variant="outlined" color="secondary" onClick={handleLogout}>
-                    Logout ({auth.username})
+                    Logout ({auth.user?.name || auth.user?.username || 'User'})
                   </Button>
                 </Box>
                 {loading && <Loader {...loadingMessage} />}
