@@ -1,50 +1,52 @@
 import React, { useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Box, Typography, Button } from '@mui/material';
 
 import theme from '../../theme';
+import { AuthProvider } from '../../contexts/AuthContext';
+import ProtectedRoute from '../ProtectedRoute';
 import DashboardLayout from '../DashboardLayout';
 import Loader from '../Loader';
 import Upload from '../Upload';
 import Main from '../Main';
-import Quiz from '../Quiz';
+import ModernQuiz from '../Quiz/ModernQuiz';
 import Result from '../Result';
 import Dashboard from '../Dashboard';
 import SignIn from '../Auth/SignIn';
 import SignUp from '../Auth/SignUp';
-
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import Profile from '../Profile';
 import { shuffle } from '../../utils';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Tabs,
-  Tab,
-  Box,
-  Typography
-} from '@mui/material';
 
-const getSession = () => {
-  const token = localStorage.getItem('sessionToken');
-  const userData = localStorage.getItem('user');
-  try {
-    if (token && userData) {
-      const user = JSON.parse(userData);
-      return { token, user };
-    }
-  } catch (e) {
-    console.error('Error parsing user data:', e);
-    localStorage.removeItem('user');
-    localStorage.removeItem('sessionToken');
-  }
-  return null;
-};
+// Error Fallback Component
+const ErrorFallback = ({ error, resetErrorBoundary }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      gap: 2,
+      p: 3,
+      textAlign: 'center'
+    }}
+  >
+    <Typography variant="h4" color="error" gutterBottom>
+      Something went wrong
+    </Typography>
+    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+      {error.message}
+    </Typography>
+    <Button variant="contained" onClick={resetErrorBoundary}>
+      Try again
+    </Button>
+  </Box>
+);
 
-const App = () => {
+const AppContent = () => {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(null);
   const [data, setData] = useState(null);
@@ -53,100 +55,27 @@ const App = () => {
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [selectedItem, setSelectedItem] = useState('Dashboard');
-  const [auth, setAuth] = useState(getSession());
-  const [authTab, setAuthTab] = useState(0); // 0: Sign In, 1: Sign Up
-  const [authForm, setAuthForm] = useState({ username: '', password: '' });
-  const [authError, setAuthError] = useState('');
-  const [authLoading, setAuthLoading] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // Check for session on initial load and route changes
-  React.useEffect(() => {
-    const currentSession = getSession();
-    if (currentSession) {
-      setAuth(currentSession);
-      // If we're on auth pages but already logged in, redirect to home
-      if (location.pathname === '/signin' || location.pathname === '/signup') {
-        navigate('/');
-      }
-    } else if (location.pathname !== '/signup') {
-      // If not logged in and not on signup page, redirect to signin
-      navigate('/signin');
-    }
-  }, [location.pathname, navigate]);
 
   const handleMenuSelect = (item) => {
-    setSelectedItem(item); // Update the selected items
+    setSelectedItem(item);
   };
 
-  const handleAuthInput = (e) => {
-    setAuthForm({ ...authForm, [e.target.name]: e.target.value });
-  };
-
-  const handleAuthTab = (e, newValue) => {
-    setAuthTab(newValue);
-    setAuthError('');
-    setAuthForm({ username: '', password: '' });
-  };
-
-  const handleAuth = async () => {
-    setAuthLoading(true);
-    setAuthError('');
-    try {
-      const type = authTab === 0 ? 'signin' : 'signup';
-      const res = await fetch('/api/upload-json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...authForm, type })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setAuthError(data.error || 'Authentication failed');
-      } else {
-        if (type === 'signin') {
-          localStorage.setItem('sessionToken', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user || { username: data.username }));
-          setAuth({ 
-            token: data.token, 
-            user: data.user || { username: data.username }
-          });
-          navigate('/');
-        } else {
-          setAuthTab(0);
-          setAuthError('Sign up successful! Please sign in.');
-        }
-        setAuthForm({ username: '', password: '' });
-      }
-    } catch (e) {
-      setAuthError('Network error');
-    }
-    setAuthLoading(false);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('sessionToken');
-    localStorage.removeItem('user');
-    setAuth(null);
-    navigate('/signin');
-  };
-
-  const startQuiz = (data, countdownTime) => {
+  const startQuiz = (quizData, time) => {
     setLoading(true);
     setLoadingMessage({
       title: 'Loading your quiz...',
       message: "It won't be long!",
     });
-    setCountdownTime(countdownTime);
+    setCountdownTime(time);
 
     setTimeout(() => {
-      setData(data);
+      setData(quizData);
       setIsQuizStarted(true);
       setLoading(false);
     }, 1000);
   };
 
-  const endQuiz = resultData => {
+  const endQuiz = (results) => {
     setLoading(true);
     setLoadingMessage({
       title: 'Fetching your results...',
@@ -156,7 +85,7 @@ const App = () => {
     setTimeout(() => {
       setIsQuizStarted(false);
       setIsQuizCompleted(true);
-      setResultData(resultData);
+      setResultData(results);
       setLoading(false);
     }, 2000);
   };
@@ -200,55 +129,115 @@ const App = () => {
     }, 1000);
   };
 
-  // Remove duplicate navigation logic
-
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Routes>
-        <Route path="/signin" element={<SignIn setAuth={setAuth} />} />
-        <Route path="/signup" element={<SignUp setAuthTab={() => {}} />} />
-        <Route
-          path="/*"
-          element={
-            auth ? (
-              <DashboardLayout onMenuSelect={handleMenuSelect} selectedItem={selectedItem}>
-                <Box sx={{ position: 'absolute', top: 16, right: 24, zIndex: 1201, display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {auth.user?.picture && (
-                    <img 
-                      src={auth.user.picture} 
-                      alt="Profile" 
-                      style={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: '50%',
-                        border: '2px solid #fff',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                      }} 
-                    />
-                  )}
-                  <Button variant="outlined" color="secondary" onClick={handleLogout}>
-                    Logout ({auth.user?.name || auth.user?.username || 'User'})
-                  </Button>
-                </Box>
-                {loading && <Loader {...loadingMessage} />}
-                {!loading && selectedItem === 'Dashboard' && <Dashboard />}
-                {!loading && selectedItem === 'Update' && !isQuizStarted && !isQuizCompleted && <Upload />}
-                {!loading && !isQuizStarted && !isQuizCompleted && selectedItem === 'Create' && (
-                  <Main startQuiz={startQuiz} />
-                )}
-                {!loading && isQuizStarted && selectedItem !== 'Update' && (
-                  <Quiz data={data} countdownTime={countdownTime} endQuiz={endQuiz} />
-                )}
-                {!loading && isQuizCompleted && selectedItem !== 'Update' && (
-                  <Result {...resultData} replayQuiz={replayQuiz} resetQuiz={resetQuiz} />
-                )}
-              </DashboardLayout>
-            ) : null
-          }
-        />
-      </Routes>
-    </ThemeProvider>
+    <Routes>
+      {/* Public Routes */}
+      <Route
+        path="/signin"
+        element={
+          <ProtectedRoute requireAuth={false}>
+            <SignIn />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <ProtectedRoute requireAuth={false}>
+            <SignUp />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected Routes */}
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute requireAuth={true}>
+            <DashboardLayout onMenuSelect={handleMenuSelect} selectedItem={selectedItem}>
+              {/* Profile Component in Header */}
+              <Box sx={{ position: 'absolute', top: 16, right: 24, zIndex: 1201 }}>
+                <Profile />
+              </Box>
+
+              {/* Main Content */}
+              {loading && <Loader {...loadingMessage} />}
+              
+              {!loading && selectedItem === 'Dashboard' && !isQuizStarted && !isQuizCompleted && (
+                <Dashboard />
+              )}
+              
+              {!loading && selectedItem === 'Update' && !isQuizStarted && !isQuizCompleted && (
+                <Upload />
+              )}
+              
+              {!loading && selectedItem === 'Create' && !isQuizStarted && !isQuizCompleted && (
+                <Main startQuiz={startQuiz} />
+              )}
+              
+              {!loading && isQuizStarted && (
+                <ModernQuiz 
+                  data={data} 
+                  countdownTime={countdownTime} 
+                  endQuiz={endQuiz} 
+                />
+              )}
+              
+              {!loading && isQuizCompleted && (
+                <Result 
+                  {...resultData} 
+                  replayQuiz={replayQuiz} 
+                  resetQuiz={resetQuiz} 
+                />
+              )}
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 404 Route */}
+      <Route
+        path="*"
+        element={
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '100vh',
+              gap: 2
+            }}
+          >
+            <Typography variant="h3" color="primary">
+              404
+            </Typography>
+            <Typography variant="h6" color="text.secondary">
+              Page not found
+            </Typography>
+            <Button variant="contained" onClick={() => window.location.href = '/'}>
+              Go Home
+            </Button>
+          </Box>
+        }
+      />
+    </Routes>
+  );
+};
+
+const App = () => {
+  return (
+    <ErrorBoundary
+      FallbackComponent={ErrorFallback}
+      onReset={() => window.location.reload()}
+    >
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
 
