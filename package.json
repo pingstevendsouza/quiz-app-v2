@@ -93,5 +93,6 @@
     "gh-pages": "^6.0.0",
     "storybook": "^7.4.5",
     "webpack": "^5.88.2"
-  }
+  },
+  "proxy": "https://quiz-app-v2-rho.vercel.app"
 }

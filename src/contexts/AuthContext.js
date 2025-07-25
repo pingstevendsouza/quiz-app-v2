@@ -21,22 +21,13 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Session validation
+  // Session validation - simplified since we don't have a validate endpoint
   const validateSession = async (sessionToken) => {
     try {
-      const response = await fetch('/api/auth/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        return data.valid;
-      }
-      return false;
+      console.log('Validating session token (client-side only)');
+      // Since we don't have a validate endpoint, we'll just check if the token exists
+      // A real implementation would verify this token with the server
+      return !!sessionToken;
     } catch (error) {
       console.error('Session validation error:', error);
       return false;
@@ -47,29 +38,44 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth state...');
         const storedToken = localStorage.getItem(SESSION_STORAGE_KEY);
         const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-
-        if (storedToken && storedUser) {
+        
+        console.log('Stored token exists:', !!storedToken);
+        console.log('Stored user exists:', !!storedUser);
+        
+        if (storedToken) {
+          // Validate the token
+          console.log('Validating session token...');
           const isValid = await validateSession(storedToken);
+          console.log('Token validation result:', isValid);
           
           if (isValid) {
+            console.log('Token is valid, setting auth state');
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
           } else {
-            // Invalid session, clear storage
-            localStorage.removeItem(SESSION_STORAGE_KEY);
-            localStorage.removeItem(USER_STORAGE_KEY);
+            // Try to refresh the token
+            console.log('Token invalid, attempting refresh...');
+            const refreshed = await refreshToken(storedToken);
+            console.log('Token refresh result:', refreshed);
+            
+            if (!refreshed) {
+              // Clear invalid session
+              console.log('Clearing invalid session');
+              localStorage.removeItem(SESSION_STORAGE_KEY);
+              localStorage.removeItem(USER_STORAGE_KEY);
+            }
           }
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        setError('Failed to initialize authentication');
       } finally {
         setLoading(false);
       }
     };
-
+    
     initializeAuth();
   }, []);
 
@@ -117,15 +123,20 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     
     try {
+      console.log('Starting Google login with credential:', credential ? 'credential provided' : 'no credential');
+      
       const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ credential })
+        body: JSON.stringify({ credential }),
+        credentials: 'include' // Important for cookies
       });
 
+      console.log('Google login response status:', response.status);
       const data = await response.json();
+      console.log('Google login response data:', data);
 
       if (response.ok) {
         setToken(data.token);
@@ -172,22 +183,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Refresh token function
-  const refreshToken = async () => {
+  // Refresh token function - simplified since we don't have a refresh endpoint
+  const refreshToken = async (currentToken = token) => {
     try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setToken(data.token);
-        localStorage.setItem(SESSION_STORAGE_KEY, data.token);
-        return true;
-      }
+      console.log('Token refresh not implemented on backend');
+      // Since we don't have a refresh endpoint, we'll just return false
+      // A real implementation would request a new token from the server
       return false;
     } catch (error) {
       console.error('Token refresh error:', error);

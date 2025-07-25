@@ -31,19 +31,28 @@ import {
   Logout,
   Person,
   ChevronLeft,
+  ChevronRight,
   Psychology,
+  AccountCircle,
 } from '@mui/icons-material';
 
+// Configurable drawer width for expanded and collapsed states
 const drawerWidth = 260;
+const collapsedDrawerWidth = 70;
 
 const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    if (isMobile) {
+      setMobileOpen(!mobileOpen);
+    } else {
+      setSidebarCollapsed(!sidebarCollapsed);
+    }
   };
 
   const handleProfileMenuOpen = (event) => {
@@ -69,14 +78,32 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
           background: 'linear-gradient(180deg, #5e72e4 0%, #324cdd 100%)',
           color: 'white',
           minHeight: { xs: 64, sm: 70 },
+          justifyContent: 'space-between',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1.5, 
+          flexGrow: 1,
+          overflow: 'hidden',
+        }}>
           <Psychology sx={{ fontSize: 32 }} />
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700, letterSpacing: '-0.5px' }}>
-            Brainy
-          </Typography>
+          {!sidebarCollapsed && (
+            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700, letterSpacing: '-0.5px' }}>
+              Brainy
+            </Typography>
+          )}
         </Box>
+        <IconButton
+          color="inherit"
+          aria-label={sidebarCollapsed ? "expand drawer" : "collapse drawer"}
+          edge="end"
+          onClick={handleDrawerToggle}
+          sx={{ display: { xs: 'none', md: 'flex' } }}
+        >
+          {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
+        </IconButton>
         {isMobile && (
           <IconButton
             color="inherit"
@@ -89,50 +116,61 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
         )}
       </Toolbar>
       <Divider />
-      <List sx={{ flexGrow: 1, px: 2, py: 3 }}>
+      <List sx={{ flexGrow: 1, px: sidebarCollapsed ? 1 : 2, py: 3 }}>
         {menuItems.map((item, index) => (
           <Fade in timeout={300 + index * 100} key={item.value}>
             <ListItem disablePadding sx={{ mb: 1 }}>
-              <ListItemButton
-                selected={selectedItem === item.value}
-                onClick={() => {
-                  onMenuSelect(item.value);
-                  if (isMobile) {
-                    setTimeout(() => setMobileOpen(false), 200);
-                  }
-                }}
-                sx={{
-                  borderRadius: 2,
-                  transition: 'all 0.3s ease',
-                  '&.Mui-selected': {
-                    backgroundColor: 'rgba(94, 114, 228, 0.08)',
-                    '&:hover': {
-                      backgroundColor: 'rgba(94, 114, 228, 0.12)',
-                    },
-                    '& .MuiListItemIcon-root': {
-                      color: theme.palette.primary.main,
-                    },
-                    '& .MuiListItemText-primary': {
-                      color: theme.palette.primary.main,
-                      fontWeight: 600,
-                    },
-                  },
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40, color: theme.palette.text.secondary }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
+              <Tooltip title={sidebarCollapsed ? item.text : ""} placement="right">
+                <ListItemButton
+                  selected={selectedItem === item.value}
+                  onClick={() => {
+                    onMenuSelect(item.value);
+                    if (isMobile) {
+                      setTimeout(() => setMobileOpen(false), 200);
+                    }
                   }}
-                />
-              </ListItemButton>
+                  sx={{
+                    borderRadius: 2,
+                    justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                    minHeight: 44,
+                    transition: 'all 0.3s ease',
+                    '&.Mui-selected': {
+                      backgroundColor: 'rgba(94, 114, 228, 0.08)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(94, 114, 228, 0.12)',
+                      },
+                      '& .MuiListItemIcon-root': {
+                        color: theme.palette.primary.main,
+                      },
+                      '& .MuiListItemText-primary': {
+                        color: theme.palette.primary.main,
+                        fontWeight: 600,
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ 
+                    minWidth: sidebarCollapsed ? 0 : 40, 
+                    color: theme.palette.text.secondary,
+                    mr: sidebarCollapsed ? 0 : 2,
+                    justifyContent: 'center'
+                  }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  {!sidebarCollapsed && (
+                    <ListItemText
+                      primary={item.text}
+                      primaryTypographyProps={{
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </Tooltip>
             </ListItem>
           </Fade>
         ))}
@@ -164,11 +202,12 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
       <AppBar
         position="fixed"
         sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${sidebarCollapsed ? collapsedDrawerWidth : drawerWidth}px)` },
+          ml: { md: `${sidebarCollapsed ? collapsedDrawerWidth : drawerWidth}px` },
           backgroundColor: 'white',
           color: theme.palette.text.primary,
           boxShadow: '0 2px 9px -3px rgba(0,0,0,0.05)',
+          transition: 'all 0.3s ease',
         }}
       >
         <Toolbar>
@@ -188,20 +227,29 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
              selectedItem === 'Results' ? 'Quiz Results' :
              selectedItem === 'Settings' ? 'Settings' : 'ServiceNow Quiz App'}
           </Typography>
-          <Tooltip title="Account settings">
-            <IconButton
-              onClick={handleProfileMenuOpen}
-              size="small"
-              sx={{ ml: 2 }}
-              aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
-            >
-              <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main }}>
-                <Person />
-              </Avatar>
-            </IconButton>
-          </Tooltip>
+          <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <Tooltip title="Account settings">
+              <IconButton
+                onClick={handleProfileMenuOpen}
+                size="small"
+                sx={{ ml: 2, position: 'relative' }}
+                aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+              >
+                <Avatar 
+                  sx={{ 
+                    width: 32, 
+                    height: 32, 
+                    bgcolor: theme.palette.primary.main,
+                    transform: 'translateX(0)' // Prevent shifting
+                  }}
+                >
+                  <Person />
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -245,7 +293,11 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
       </AppBar>
       <Box
         component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        sx={{ 
+          width: { md: sidebarCollapsed ? collapsedDrawerWidth : drawerWidth }, 
+          flexShrink: { md: 0 },
+          transition: 'width 0.3s ease',
+        }}
       >
         <Drawer
           variant={isMobile ? 'temporary' : 'permanent'}
@@ -257,9 +309,11 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
           sx={{
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
-              width: drawerWidth,
+              width: sidebarCollapsed ? collapsedDrawerWidth : drawerWidth,
               border: 'none',
               boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)',
+              transition: 'width 0.3s ease',
+              overflowX: 'hidden',
             },
           }}
         >
@@ -271,8 +325,9 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
+          width: { md: `calc(100% - ${sidebarCollapsed ? collapsedDrawerWidth : drawerWidth}px)` },
           mt: { xs: 8, sm: 9 },
+          transition: 'all 0.3s ease',
         }}
       >
         <Slide direction="up" in mountOnEnter unmountOnExit timeout={300}>
