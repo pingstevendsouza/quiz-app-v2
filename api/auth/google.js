@@ -57,22 +57,23 @@ async function handler(req, res) {
       const username = payload.email;
       const userKey = `user:${username}`;
       
-      // Create or update user
-      await redis.set(userKey, JSON.stringify({
+      // Create or update user using hset
+      await redis.hset(userKey, {
         username,
         name: payload.name,
         picture: payload.picture,
         email: payload.email,
-        google: true
-      }));
+        google: 'true'  // Storing as string since Redis doesn't have boolean type
+      });
 
-      // Create session
+      // Create session using hset
       const sessionToken = crypto.randomBytes(32).toString('hex');
       const sessionKey = `session:${sessionToken}`;
-      await redis.set(sessionKey, JSON.stringify({ 
+      await redis.hset(sessionKey, {
         username,
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
-      }), { ex: 24 * 60 * 60 }); // 24 hours expiry
+        expiresAt: (Date.now() + 24 * 60 * 60 * 1000).toString() // 24 hours from now
+      });
+      await redis.expire(sessionKey, 24 * 60 * 60); // 24 hours expiry
 
       return res.status(200).json({
         message: 'Google sign-in successful',
