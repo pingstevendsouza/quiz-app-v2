@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   Box,
   Drawer,
@@ -20,6 +21,7 @@ import {
   useMediaQuery,
   Fade,
   Slide,
+  Chip
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -46,6 +48,12 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  
+  // Debug user object
+  useEffect(() => {
+    console.log('DashboardLayout - User object:', user);
+  }, [user]);
 
   const handleDrawerToggle = () => {
     if (isMobile) {
@@ -228,24 +236,45 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
              selectedItem === 'Settings' ? 'Settings' : 'ServiceNow Quiz App'}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            {user?.name && (
+              <Box sx={{ display: { xs: 'none', sm: 'block' }, mr: 1 }}>
+                <Typography variant="body2" fontWeight={600}>
+                  {user.name}
+                </Typography>
+              </Box>
+            )}
             <Tooltip title="Account settings">
               <IconButton
                 onClick={handleProfileMenuOpen}
                 size="small"
-                sx={{ ml: 2, position: 'relative' }}
+                sx={{ 
+                  ml: 1, 
+                  position: 'relative',
+                  border: '2px solid transparent',
+                  '&:hover': {
+                    bgcolor: 'rgba(94, 114, 228, 0.04)',
+                  },
+                  '&:focus': {
+                    outline: 'none',
+                  }
+                }}
                 aria-controls={Boolean(anchorEl) ? 'account-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
               >
                 <Avatar 
+                  src={user?.photoURL || user?.picture || (user?.google?.picture)}
+                  alt={user?.name || user?.email || 'User'}
                   sx={{ 
                     width: 32, 
                     height: 32, 
-                    bgcolor: theme.palette.primary.main,
-                    transform: 'translateX(0)' // Prevent shifting
+                    bgcolor: (user?.photoURL || user?.picture || user?.google?.picture) ? 'transparent' : 'white',
+                    color: theme.palette.primary.main,
+                    transform: 'translateX(0)', // Prevent shifting
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
                   }}
                 >
-                  <Person />
+                  {!(user?.photoURL || user?.picture || user?.google?.picture) && (user?.name ? user.name.charAt(0).toUpperCase() : <Person fontSize="small" />)}
                 </Avatar>
               </IconButton>
             </Tooltip>
@@ -256,24 +285,73 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
             onClose={handleProfileMenuClose}
             onClick={handleProfileMenuClose}
             PaperProps={{
-              elevation: 0,
+              elevation: 8,
               sx: {
                 overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.1))',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
                 mt: 1.5,
+                minWidth: 280,
                 '& .MuiAvatar-root': {
                   width: 32,
                   height: 32,
                   ml: -0.5,
                   mr: 1,
                 },
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
               },
             }}
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           >
+            {/* User Info in Menu */}
+            {user && (
+              <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    src={user?.photoURL || user?.picture || (user?.google?.picture)}
+                    alt={user?.name || user?.email || 'User'}
+                    sx={{ width: 48, height: 48 }}
+                  >
+                    {!(user?.photoURL || user?.picture || user?.google?.picture) && (user?.name ? user.name.charAt(0).toUpperCase() : <Person />)}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {user?.name || 'User'}
+                    </Typography>
+                    {user?.email && (
+                      <Typography variant="body2" color="text.secondary">
+                        {user.email}
+                      </Typography>
+                    )}
+                    {user?.google && (
+                      <Chip
+                        label="Google Account"
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{ mt: 0.5, height: 20, fontSize: '0.7rem' }}
+                      />
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            )}
             <MenuItem>
-              <Avatar /> Profile
+              <ListItemIcon>
+                <Person fontSize="small" />
+              </ListItemIcon>
+              Profile
             </MenuItem>
             <MenuItem>
               <ListItemIcon>
@@ -282,9 +360,14 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
               Settings
             </MenuItem>
             <Divider />
-            <MenuItem>
+            <MenuItem onClick={() => {
+              handleProfileMenuClose();
+              if (user) {
+                logout();
+              }
+            }} sx={{ color: 'error.main' }}>
               <ListItemIcon>
-                <Logout fontSize="small" />
+                <Logout fontSize="small" sx={{ color: 'error.main' }} />
               </ListItemIcon>
               Logout
             </MenuItem>
