@@ -21,18 +21,67 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Session validation - simplified since we don't have a validate endpoint
+  // Session validation with server-side endpoint
   const validateSession = async (sessionToken) => {
     try {
-      console.log('Validating session token (client-side only)');
-      // Since we don't have a validate endpoint, we'll just check if the token exists
-      // A real implementation would verify this token with the server
-      return !!sessionToken;
+      console.log('Validating session token with server...');
+      
+      const response = await fetch('/api/auth/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ token: sessionToken }),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Token validation successful:', data);
+        
+        // Update user data if provided
+        if (data.user) {
+          setUser(data.user);
+          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+        }
+        
+        return data.valid;
+      } else {
+        console.error('Token validation failed:', response.status);
+        return false;
+      }
     } catch (error) {
       console.error('Session validation error:', error);
-      return false;
+      // Fallback to client-side check if server is unreachable
+      return !!sessionToken;
     }
   };
+
+  // Cross-tab synchronization
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === SESSION_STORAGE_KEY) {
+        if (e.newValue) {
+          // Another tab logged in
+          const newToken = e.newValue;
+          const newUser = localStorage.getItem(USER_STORAGE_KEY);
+          if (newUser) {
+            console.log('Session updated from another tab');
+            setToken(newToken);
+            setUser(JSON.parse(newUser));
+          }
+        } else {
+          // Another tab logged out
+          console.log('Session cleared from another tab');
+          setToken(null);
+          setUser(null);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Initialize auth state from localStorage
   useEffect(() => {

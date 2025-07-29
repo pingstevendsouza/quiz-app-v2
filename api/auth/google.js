@@ -19,13 +19,28 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Handle CORS preflight
 const allowCors = (handler) => async (req, res) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://quiz-app-v2.vercel.app',
+    process.env.VERCEL_URL && `https://${process.env.VERCEL_URL}`
+  ].filter(Boolean);
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -82,7 +97,11 @@ async function handler(req, res) {
           username,
           name: payload.name,
           email: payload.email,
-          picture: payload.picture
+          picture: payload.picture,
+          photoURL: payload.picture, // Add photoURL for compatibility
+          google: {
+            picture: payload.picture // Add nested structure for compatibility
+          }
         }
       });
 
