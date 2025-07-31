@@ -95,5 +95,8 @@
     "storybook": "^9.0.18",
     "webpack": "^5.88.2"
   },
-  "proxy": "https://quiz-app-v2-rho.vercel.app"
+  "proxy": "https://quiz-app-v2-rho.vercel.app",
+  "engines": {
+    "node": "18.x"
+  }
 }
