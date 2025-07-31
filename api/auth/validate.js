@@ -54,6 +54,16 @@ const allowCors = (handler) => async (req, res) => {
 };
 
 async function handler(req, res) {
+  // Log request details for debugging
+  console.log('Validate API called with method:', req.method);
+  console.log('Request headers:', req.headers);
+  console.log('Request body exists:', !!req.body);
+  
+  // Handle OPTIONS request for CORS preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'POST') {
     console.log('Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
@@ -84,6 +94,12 @@ async function handler(req, res) {
   }
 
   try {
+    // Check if body is properly parsed
+    if (!req.body) {
+      console.error('Request body is undefined or not properly parsed');
+      return res.status(400).json({ error: 'Invalid request format' });
+    }
+    
     const { token } = req.body;
     
     console.log('Validating token:', token ? 'Token provided' : 'No token provided');

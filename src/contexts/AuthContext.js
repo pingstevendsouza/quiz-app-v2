@@ -24,17 +24,30 @@ export const AuthProvider = ({ children }) => {
   // Session validation with server-side endpoint
   const validateSession = async (sessionToken) => {
     try {
-      console.log('Validating session token with server...');
+      console.log('Validating session token with server...', sessionToken ? 'Token exists' : 'No token');
       
-      const response = await fetch('/api/auth/validate', {
+      // Don't proceed if no token is provided
+      if (!sessionToken) {
+        console.error('No token provided for validation');
+        return false;
+      }
+      
+      // Use absolute URL to avoid path issues on Vercel
+      const apiUrl = window.location.origin + '/api/auth/validate';
+      console.log('Using API URL:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ token: sessionToken }),
         credentials: 'include'
       });
 
+      console.log('Validation response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
         console.log('Token validation successful:', data);
