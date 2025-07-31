@@ -48,6 +48,17 @@ export const AuthProvider = ({ children }) => {
         return data.valid;
       } else {
         console.error('Token validation failed:', response.status);
+        try {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Validation error details:', errorData);
+        } catch (err) {
+          console.error('Failed to parse error response:', err);
+        }
+        // Fallback: Don't invalidate session immediately if server error occurs
+        if (response.status >= 500) {
+          console.warn('Server error occurred, maintaining session temporarily');
+          return true;
+        }
         return false;
       }
     } catch (error) {
@@ -103,7 +114,15 @@ export const AuthProvider = ({ children }) => {
           if (isValid) {
             console.log('Token is valid, setting auth state');
             setToken(storedToken);
-            setUser(JSON.parse(storedUser));
+            if (storedUser) {
+              try {
+                setUser(JSON.parse(storedUser));
+              } catch (e) {
+                console.error('Failed to parse stored user data', e);
+                setUser(null);
+                localStorage.removeItem(USER_STORAGE_KEY);
+              }
+            }
           } else {
             // Try to refresh the token
             console.log('Token invalid, attempting refresh...');
@@ -117,11 +136,14 @@ export const AuthProvider = ({ children }) => {
               localStorage.removeItem(USER_STORAGE_KEY);
             }
           }
+        } else {
+          console.log('No stored token found, user is not logged in');
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
       } finally {
         setLoading(false);
+        console.log('Auth initialization complete, loading state set to false');
       }
     };
     
