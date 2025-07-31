@@ -334,15 +334,6 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
                         {user.email}
                       </Typography>
                     )}
-                    {user?.google && (
-                      <Chip
-                        label="Google Account"
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                        sx={{ mt: 0.5, height: 20, fontSize: '0.7rem' }}
-                      />
-                    )}
                   </Box>
                 </Box>
               </Box>
