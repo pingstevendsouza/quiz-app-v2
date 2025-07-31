@@ -33,16 +33,25 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Use absolute URL to avoid path issues on Vercel
+      // First try the current origin, fallback to the proxy URL if needed
       const apiUrl = window.location.origin + '/api/auth/validate';
       console.log('Using API URL:', apiUrl);
+      
+      // Log the token being sent (first few characters for security)
+      console.log('Sending token for validation:', sessionToken.substring(0, 5) + '...');
+      
+      const requestBody = JSON.stringify({ token: sessionToken });
+      console.log('Request body:', requestBody);
       
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
         },
-        body: JSON.stringify({ token: sessionToken }),
+        body: requestBody,
         credentials: 'include'
       });
 
@@ -118,36 +127,32 @@ export const AuthProvider = ({ children }) => {
         console.log('Stored token exists:', !!storedToken);
         console.log('Stored user exists:', !!storedUser);
         
+        // Set token and user immediately from localStorage to prevent flash of unauthenticated state
         if (storedToken) {
-          // Validate the token
+          setToken(storedToken);
+          console.log('Token set from localStorage:', storedToken.substring(0, 10) + '...');
+          
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              setUser(parsedUser);
+              console.log('User set from localStorage:', parsedUser.username);
+            } catch (e) {
+              console.error('Failed to parse stored user data', e);
+            }
+          }
+          
+          // Validate the token asynchronously
           console.log('Validating session token...');
           const isValid = await validateSession(storedToken);
           console.log('Token validation result:', isValid);
           
-          if (isValid) {
-            console.log('Token is valid, setting auth state');
-            setToken(storedToken);
-            if (storedUser) {
-              try {
-                setUser(JSON.parse(storedUser));
-              } catch (e) {
-                console.error('Failed to parse stored user data', e);
-                setUser(null);
-                localStorage.removeItem(USER_STORAGE_KEY);
-              }
-            }
-          } else {
-            // Try to refresh the token
-            console.log('Token invalid, attempting refresh...');
-            const refreshed = await refreshToken(storedToken);
-            console.log('Token refresh result:', refreshed);
-            
-            if (!refreshed) {
-              // Clear invalid session
-              console.log('Clearing invalid session');
-              localStorage.removeItem(SESSION_STORAGE_KEY);
-              localStorage.removeItem(USER_STORAGE_KEY);
-            }
+          if (!isValid) {
+            console.log('Token is invalid, clearing auth state');
+            setToken(null);
+            setUser(null);
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+            localStorage.removeItem(USER_STORAGE_KEY);
           }
         } else {
           console.log('No stored token found, user is not logged in');

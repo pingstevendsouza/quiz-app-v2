@@ -100,9 +100,33 @@ async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid request format' });
     }
     
-    const { token } = req.body;
+    // Log the full request body for debugging
+    console.log('Request body received:', JSON.stringify(req.body));
     
-    console.log('Validating token:', token ? 'Token provided' : 'No token provided');
+    // Try to extract token from multiple possible sources
+    let token = null;
+    
+    // 1. Check body.token (standard approach)
+    if (req.body.token) {
+      token = req.body.token;
+      console.log('Token found in request body');
+    } 
+    // 2. Check authorization header
+    else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+      console.log('Token found in Authorization header');
+    }
+    // 3. Check cookies
+    else if (req.headers.cookie) {
+      const cookies = req.headers.cookie.split(';').map(c => c.trim());
+      const sessionCookie = cookies.find(c => c.startsWith('session='));
+      if (sessionCookie) {
+        token = sessionCookie.split('=')[1];
+        console.log('Token found in cookies');
+      }
+    }
+    
+    console.log('Validating token:', token ? `Token found (${token.substring(0, 5)}...)` : 'No token provided');
     if (!token) {
       return res.status(400).json({ error: 'Token is required' });
     }
