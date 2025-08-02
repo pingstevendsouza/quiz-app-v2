@@ -235,6 +235,13 @@ const DashboardLayout = ({ children, onMenuSelect, selectedItem }) => {
              selectedItem === 'Settings' ? 'Settings' : 'ServiceNow Quiz App'}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            {user?.name && (
+              <Box sx={{ display: { xs: 'none', sm: 'block' }, mr: 1 }}>
+                <Typography variant="body2" fontWeight={600}>
+                  {user.name}
+                </Typography>
+              </Box>
+            )}
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Theme Toggle Button */}
