@@ -35,9 +35,11 @@ import {
   Help as HelpIcon
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = ({ variant = 'header', showUserInfo = true }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const open = Boolean(anchorEl);
@@ -61,8 +63,39 @@ const Profile = ({ variant = 'header', showUserInfo = true }) => {
 
   const handleMenuItemClick = (action) => {
     handleClose();
-    // Handle menu item actions here
-    console.log('Menu action:', action);
+    
+    switch (action) {
+      case 'edit-profile':
+      case 'view-profile':
+        navigate('/profile');
+        break;
+      case 'social-profile':
+        navigate('/profile?tab=2'); // Navigate to social tab
+        break;
+      case 'billing':
+        // For now, navigate to profile - can be updated when billing page is created
+        navigate('/profile');
+        break;
+      case 'account-settings':
+      case 'privacy-settings':
+      case 'notifications':
+        navigate('/profile?tab=3'); // Navigate to settings tab
+        break;
+      case 'dashboard':
+        navigate('/dashboard');
+        break;
+      case 'my-quizzes':
+        navigate('/quizzes');
+        break;
+      case 'analytics':
+        navigate('/analytics');
+        break;
+      case 'help':
+        navigate('/help');
+        break;
+      default:
+        console.log('Menu action:', action);
+    }
   };
 
   const getInitials = (name) => {

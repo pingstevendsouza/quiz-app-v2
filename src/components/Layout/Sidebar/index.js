@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -48,6 +48,7 @@ import {
   Logout,
   Edit,
   AccountCircle,
+  Add,
   Layers,
   ViewQuilt,
   Animation,
@@ -108,8 +109,23 @@ const menuGroups = [
     items: [
       { id: 'start-quiz', text: 'Start Quiz', icon: <QuizIcon fontSize="small" />, value: 'Create', isExpandable: false },
       { id: 'manage-exams', text: 'Manage Exams', icon: <CloudUpload fontSize="small" />, value: 'Update', isExpandable: false },
+      { id: 'ai-form-builder', text: 'AI Form Builder', icon: <Psychology fontSize="small" />, value: 'ai-form-builder', isExpandable: false },
       { id: 'results', text: 'Results', icon: <Assessment fontSize="small" />, value: 'Results', isExpandable: false },
       { id: 'settings', text: 'Settings', icon: <Settings fontSize="small" />, value: 'Settings', isExpandable: false },
+    ]
+  },
+  {
+    id: 'custom-forms',
+    label: 'Custom Forms',
+    items: [
+      ...customForms.map(form => ({
+        id: form.id,
+        text: form.name,
+        icon: <DataObject fontSize="small" />,
+        value: `custom-form-${form.id}`,
+        isExpandable: false
+      })),
+      { id: 'ai-form-builder', text: 'Create New Form', icon: <Add fontSize="small" />, value: 'ai-form-builder', isExpandable: false }
     ]
   },
 ];
@@ -128,7 +144,19 @@ const Sidebar = ({
 }) => {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [popoverGroup, setPopoverGroup] = useState(null);
   const [openGroups, setOpenGroups] = useState({});
+  const [customForms, setCustomForms] = useState([]);
+
+  // Popover open/close handlers for submenu
+  const handlePopoverOpen = (event, groupId) => {
+    setAnchorEl(event.currentTarget);
+    setPopoverGroup(groupId);
+  };
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+    setPopoverGroup(null);
+  };
 
   const handleMenuItemClick = (value) => {
     onMenuSelect(value);
@@ -158,6 +186,24 @@ const Sidebar = ({
       [groupId]: !prev[groupId]
     }));
   };
+
+  // Load custom forms from localStorage
+  useEffect(() => {
+    const loadCustomForms = () => {
+      const storedForms = JSON.parse(localStorage.getItem('customForms') || '[]');
+      setCustomForms(storedForms);
+    };
+
+    loadCustomForms();
+
+    // Listen for new form creation
+    const handleFormCreated = (event) => {
+      loadCustomForms();
+    };
+
+    window.addEventListener('formCreated', handleFormCreated);
+    return () => window.removeEventListener('formCreated', handleFormCreated);
+  }, []);
 
   const drawerContent = (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -275,39 +321,35 @@ const Sidebar = ({
                     >
                       <ListItemButton
                         selected={selectedItem === item.value}
-                        onClick={() => item.isExpandable ? 
-                          handleGroupToggle(item.id) : 
-                          handleMenuItemClick(item.value)
-                        }
+                        onClick={(e) => {
+                          if (collapsed && item.hasChildren) {
+                            handlePopoverOpen(e, item.id);
+                          } else if (item.isExpandable) {
+                            handleGroupToggle(item.id);
+                          } else {
+                            handleMenuItemClick(item.value);
+                          }
+                        }}
+                        onMouseEnter={(e) => {
+                          if (collapsed && item.hasChildren) {
+                            handlePopoverOpen(e, item.id);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (collapsed && item.hasChildren) {
+                            handlePopoverClose();
+                          }
+                        }}
                         sx={{
-                          borderRadius: 1,
-                          py: 1,
-                          px: collapsed ? 1.5 : 2,
                           minHeight: 44,
-                          transition: theme.transitions.create(['all'], {
-                            duration: theme.transitions.duration.standard,
-                          }),
-                          ...(collapsed && {
-                            justifyContent: 'center',
-                          }),
-                          ...(selectedItem === item.value && {
-                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          px: collapsed ? 1.5 : 2.5,
+                          borderRadius: 2,
+                          mb: 0.5,
+                          justifyContent: collapsed ? 'center' : 'flex-start',
+                          transition: 'background .2s',
+                          '&.Mui-selected': {
+                            bgcolor: alpha(theme.palette.primary.main, 0.08),
                             color: theme.palette.primary.main,
-                            '&:hover': {
-                              bgcolor: alpha(theme.palette.primary.main, 0.15),
-                            },
-                            '& .MuiListItemIcon-root': {
-                              color: theme.palette.primary.main,
-                            },
-                            '& .MuiListItemText-primary': {
-                              color: theme.palette.primary.main,
-                              fontWeight: 600,
-                            },
-                          }),
-                          '&:hover': {
-                            bgcolor: selectedItem === item.value 
-                              ? alpha(theme.palette.primary.main, 0.15)
-                              : alpha(theme.palette.common.black, 0.04),
                           },
                         }}
                       >
@@ -726,9 +768,26 @@ const Sidebar = ({
               willChange: 'transform',
             }}
           >
-            {collapsed ? 
-              <KeyboardArrowRight sx={{ fontSize: '0.95rem', transition: 'transform 0.2s ease-in-out' }} /> : 
-              <KeyboardArrowLeft sx={{ fontSize: '0.95rem', transition: 'transform 0.2s ease-in-out' }} />}
+            {/* Mantis-style hamburger with arrow */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+              {/* Hamburger icon */}
+              <Box sx={{ width: 16, height: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', mr: '2px' }}>
+                <Box sx={{ height: 2, bgcolor: 'currentColor', mb: '2px', borderRadius: 1 }} />
+                <Box sx={{ height: 2, bgcolor: 'currentColor', mb: '2px', borderRadius: 1 }} />
+                <Box sx={{ height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
+              </Box>
+              {/* Animated arrow */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'transform 0.2s cubic-bezier(0.4,0,0.2,1)',
+                  transform: collapsed ? 'rotate(180deg)' : 'rotate(0deg)',
+                }}
+              >
+                <KeyboardArrowLeft sx={{ fontSize: '1.1rem' }} />
+              </Box>
+            </Box>
           </IconButton>
         </Box>
       )}

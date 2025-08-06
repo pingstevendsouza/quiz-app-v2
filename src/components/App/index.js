@@ -22,6 +22,8 @@ import Dashboard from '../Dashboard';
 import SignIn from '../Auth/SignIn';
 import SignUp from '../Auth/SignUp';
 import StartQuizForm from '../Quiz/StartQuizForm';
+import AIFormBuilderPage from '../../pages/AIFormBuilderPage.jsx';
+import UserProfile from '../../pages/UserProfile';
 import mockQuizData from '../Quiz/mock.json';
 
 import { shuffle } from '../../utils';
@@ -61,7 +63,7 @@ const AppContent = () => {
   const [isQuizCompleted, setIsQuizCompleted] = useState(false);
   const [resultData, setResultData] = useState(null);
   const [selectedItem, setSelectedItem] = useState('Dashboard');
-  const [quizConfig, setQuizConfig] = useState(null);
+  const [, setQuizConfig] = useState(null);
   const [useOriginalQuiz, setUseOriginalQuiz] = useState(true);
 
   const handleMenuSelect = (item) => {
@@ -212,7 +214,7 @@ const AppContent = () => {
 
       {/* Protected Routes */}
       <Route
-        path="/*"
+        path="/"
         element={
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout onMenuSelect={handleMenuSelect} selectedItem={selectedItem}>
@@ -264,6 +266,24 @@ const AppContent = () => {
                 />
               )}
             </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-form-builder"
+        element={
+          <ProtectedRoute requireAuth={true}>
+            <DashboardLayout onMenuSelect={handleMenuSelect} selectedItem="AI Form Builder">
+              <AIFormBuilderPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute requireAuth={true}>
+            <UserProfile />
           </ProtectedRoute>
         }
       />

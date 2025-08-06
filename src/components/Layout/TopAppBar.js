@@ -10,7 +10,11 @@ import {
   useTheme,
   alpha,
   Typography,
-  Button
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -21,8 +25,14 @@ import {
   FullscreenExit as FullscreenExitIcon,
   Settings as SettingsIcon,
   Language as LanguageIcon,
-  Apps as AppsIcon
+  Apps as AppsIcon,
+  Description as DescriptionIcon,
+  Assessment as AssessmentIcon,
+  People as PeopleIcon,
+  Build as BuildIcon,
+  Dashboard as DashboardIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import Profile from '../Profile';
 
 const TopAppBar = ({ 
@@ -33,8 +43,10 @@ const TopAppBar = ({
   title = "Quiz Dashboard"
 }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [appsAnchorEl, setAppsAnchorEl] = useState(null);
 
   const handleFullscreenToggle = () => {
     if (!document.fullscreenElement) {
@@ -52,8 +64,20 @@ const TopAppBar = ({
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    // Handle search functionality here
     console.log('Search:', searchValue);
+  };
+
+  const handleAppsClick = (event) => {
+    setAppsAnchorEl(event.currentTarget);
+  };
+
+  const handleAppsClose = () => {
+    setAppsAnchorEl(null);
+  };
+
+  const handleAppNavigation = (path) => {
+    navigate(path);
+    handleAppsClose();
   };
 
   return (
@@ -177,10 +201,11 @@ const TopAppBar = ({
 
         {/* Header Actions */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {/* Apps Button */}
+          {/* Applications Dropdown */}
           <Tooltip title="Applications">
             <IconButton
               size="medium"
+              onClick={handleAppsClick}
               sx={{
                 color: 'text.secondary',
                 '&:hover': {
@@ -192,6 +217,71 @@ const TopAppBar = ({
               <AppsIcon />
             </IconButton>
           </Tooltip>
+
+          <Menu
+            anchorEl={appsAnchorEl}
+            open={Boolean(appsAnchorEl)}
+            onClose={handleAppsClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            PaperProps={{
+              sx: {
+                width: 280,
+                maxHeight: 400,
+                mt: 1.5,
+                '& .MuiMenuItem-root': {
+                  px: 2,
+                  py: 1.5,
+                }
+              }
+            }}
+          >
+            <Typography variant="h6" sx={{ px: 2, py: 1, fontSize: '1rem', fontWeight: 600 }}>
+              Applications
+            </Typography>
+            <Divider />
+            
+            <MenuItem onClick={() => handleAppNavigation('/dashboard')}>
+              <ListItemIcon>
+                <DashboardIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </MenuItem>
+            
+            <MenuItem onClick={() => handleAppNavigation('/start-quiz')}>
+              <ListItemIcon>
+                <AssessmentIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Start Quiz" />
+            </MenuItem>
+            
+            <MenuItem onClick={() => handleAppNavigation('/ai-form-builder')}>
+              <ListItemIcon>
+                <BuildIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="AI Form Builder" />
+            </MenuItem>
+            
+            <MenuItem onClick={() => handleAppNavigation('/quizzes')}>
+              <ListItemIcon>
+                <DescriptionIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Quiz Management" />
+            </MenuItem>
+            
+            <MenuItem onClick={() => handleAppNavigation('/users')}>
+              <ListItemIcon>
+                <PeopleIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="User Management" />
+            </MenuItem>
+          </Menu>
 
           {/* Language Button */}
           <Tooltip title="Language">
